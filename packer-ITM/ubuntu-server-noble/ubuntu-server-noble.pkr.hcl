@@ -35,9 +35,9 @@ variable "proxmox_vm_id" {
 }
 
 variables {
-    vm_ip = "172.16.0.68"
+    vm_ip = "172.16.0.4"
     vm_gateway = "172.16.0.1"
-    vm_subnet = "255.255.255.0"
+    vm_subnet = "255.255.0.0"
     vm_dns = "8.8.8.8"
 }
 
@@ -101,7 +101,7 @@ source "proxmox-iso" "ubuntu-server-noble" {
         "e<wait>",
         "<down><down><down><end>",
         "<bs><bs><bs><bs><bs>",
-        " ip=${vm_ip}::${vm_gateway}:${vm_subnet}::::${vm_dns}",
+        " ip=${var.vm_ip}::${var.vm_gateway}:${var.vm_subnet}::::${var.vm_dns}",
         " autoinstall ds=nocloud-net\\;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/",
         " ---",
         "<wait>",
@@ -147,7 +147,7 @@ build {
 
     # Provisioning the VM Template for Cloud-Init Integration in Proxmox #2
     provisioner "file" {
-        source = "files/99-pve.cfg"
+        source = "${path.root}/files/99-pve.cfg"
         destination = "/tmp/99-pve.cfg"
     }
 
