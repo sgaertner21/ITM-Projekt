@@ -1,0 +1,31 @@
+#cloud-config
+autoinstall:
+  version: 1
+  locale: en_US
+  keyboard:
+    layout: de
+  ssh:
+    install-server: true
+    allow-pw: true
+    disable_root: true
+    ssh_quiet_keygen: true
+    allow_public_ssh_keys: true
+  packages:
+    - qemu-guest-agent
+    - sudo
+  storage:
+    layout:
+      name: direct
+    swap:
+      size: 0
+  user-data:
+    package_upgrade: false
+    timezone: Europe/Berlin
+    users:
+      - name: packer-user
+        groups: [adm, sudo]
+        lock-passwd: true
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        shell: /bin/bash
+        ssh_authorized_keys:
+          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDkX7MSWD+Rt2BSSbcsqDXq5w/8CPx9lMxl22mNBVaOpsM9H3/jjTSh6wCJ/wlwbSuOLN6yoXy4koKqwZv/REXIk9WZKguFpfVWeO9YefMpcOq4sLW+ccV7d9WbKL+WUutJxLBr05sGBiyQy0geZ/3qKlVecxudQAar4pKRAfd9f+9GsAlib5y5cEMxv7vsD6PSYM6ouIKWx/0SGqgZBSjZYdcUhRzJY6j0nUSexZO9WGcappLBb046Yw/2RfpLRfZxW3a0T+Q+k1r/XqoIblA5dnXToQV2V24oq6u/MQONodETwMulB7oRXdqAv1Ac+Wd0DNrI8zTczvFgQOtY4Qj9fkiYpuY0/4gbyx1/969CzkhU5HF+XUr3rubjH6C+p7xB4r+YQ6U/MCB6VSLL48zU2BmDZYP3M//g1P+oCxX9fq7zS7sUrH10ahP15ytOga/eWBAPtdIkvTX14fgMm1GTIXmCfUIoVrNCegBO7ntJBgiwA9UWjAsO/cetb62KpNc= root@VM01-Terraform
