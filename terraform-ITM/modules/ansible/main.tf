@@ -13,8 +13,8 @@ resource "proxmox_vm_qemu" "ansible" {
   os_type = "cloud-init"
   ciuser = "ansible"
   cipassword = "ansible"
-  nameserver = "1.1.1.1"
-  ipconfig0 = "ip=172.16.0.5/16,gw=172.16.0.1"
+  nameserver = var.nameserver
+  ipconfig0 = "ip={var.ip},gw={var.gateway}"
 
   # Speicher Cloud-Init
   disk {

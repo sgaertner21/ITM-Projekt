@@ -16,12 +16,12 @@ provider "proxmox" {
 }
 
 # Module einbinden
-module "vm_example" {
-  source         = "./modules/vm"
-  vm_name        = "example-vm"
-  vm_id          = 100
-  proxmox_node   = "pve-node1"
-  cores          = 2
-  memory         = 2048
+module "ansible" {
+  source         = "./modules/ansible"
+  vm_name        = "ansible-control-node-1"
+  vm_id          = 102
+  proxmox_node   = "proxmox-ve"
+  cores          = 1
+  memory         = 1024
   network_bridge = "vmbr0"
 }

@@ -25,6 +25,23 @@ variable "memory" {
   default     = 1024
 }
 
+variable "nameserver" {
+  description = "DNS Server der VM"
+  type        = string
+  default     = "9.9.9.9"
+}
+
+variable "ip" {
+  description = "IP der VM"
+  type        = string
+}
+
+variable "gateway" {
+  description = "Gateway der VM"
+  type        = string
+  default     = "172.16.0.1"
+}
+
 variable "network_bridge" {
   description = "Netzwerkbrücke für die VM"
   type        = string
