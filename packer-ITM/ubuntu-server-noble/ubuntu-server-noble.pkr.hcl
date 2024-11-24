@@ -34,11 +34,20 @@ variable "proxmox_vm_id" {
     type = number
 }
 
-variables {
-    vm_ip = "172.16.0.4"
-    vm_gateway = "172.16.0.1"
-    vm_subnet = "255.255.0.0"
-    vm_dns = "8.8.8.8"
+variable "vm_ip" {
+    type = string
+}
+
+variable "vm_gateway" {
+    type = string
+}
+
+variable "vm_subnet" {
+    type = string
+}
+
+variable "vm_dns" {
+    type = string
 }
 
 # Resource Definiation for the VM Template
