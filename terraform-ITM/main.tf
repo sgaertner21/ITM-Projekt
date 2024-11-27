@@ -24,4 +24,5 @@ module "ansible" {
   cores          = 1
   memory         = 1024
   network_bridge = "vmbr0"
+  ip             = "172.16.0.5/16"
 }

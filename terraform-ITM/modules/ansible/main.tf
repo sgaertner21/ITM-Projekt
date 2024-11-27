@@ -1,3 +1,12 @@
+terraform {
+        required_providers {
+                proxmox = {
+                        source = "telmate/proxmox"
+                        version = "3.0.1-rc4"
+                }
+        }
+}
+
 resource "proxmox_vm_qemu" "ansible" {
   name = var.vm_name
   vmid = var.vm_id
@@ -14,7 +23,7 @@ resource "proxmox_vm_qemu" "ansible" {
   ciuser = "ansible"
   cipassword = "ansible"
   nameserver = var.nameserver
-  ipconfig0 = "ip={var.ip},gw={var.gateway}"
+  ipconfig0 = "ip=${var.ip},gw=${var.gateway}"
 
   # Speicher Cloud-Init
   disk {
