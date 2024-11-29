@@ -14,14 +14,3 @@ variable "proxmox_api_token_secret" {
         type =  string
         sensitive = true
 }
-
-
-variable "vm_name" {
-  description = "Name der virtuellen Maschine"
-  type        = string
-}
-
-variable "vm_id" {
-  description = "ID der virtuellen Maschine"
-  type        = number
-}

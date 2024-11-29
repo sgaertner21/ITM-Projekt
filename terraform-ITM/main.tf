@@ -19,7 +19,7 @@ provider "proxmox" {
 module "ansible" {
   source         = "./modules/ansible"
   vm_name        = "ansible-control-node-1"
-  vm_id          = 102
+  vm_id          = 101
   proxmox_node   = "proxmox-ve"
   cores          = 1
   memory         = 1024
