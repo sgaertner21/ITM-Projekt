@@ -6,6 +6,7 @@ variable "vm_name" {
 variable "vm_id" {
   description = "ID der VM"
   type        = number
+  nullable = true
 }
 
 variable "proxmox_node" {
@@ -46,4 +47,9 @@ variable "network_bridge" {
   description = "Netzwerkbrücke für die VM"
   type        = string
   default     = "vmbr0"
+}
+
+variable "ssh_keys" {
+  description = "SSH-Keys für den User ansible"
+  type        = list(string)
 }

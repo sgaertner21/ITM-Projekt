@@ -21,7 +21,7 @@ resource "proxmox_vm_qemu" "ansible" {
   scsihw = "virtio-scsi-pci"
   os_type = "cloud-init"
   ciuser = "ansible"
-  cipassword = "ansible"
+  sshkeys = join("\n", var.ssh_keys)
   nameserver = var.nameserver
   ipconfig0 = "ip=${var.ip},gw=${var.gateway}"
 

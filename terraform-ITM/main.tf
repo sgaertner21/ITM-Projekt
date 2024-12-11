@@ -18,11 +18,12 @@ provider "proxmox" {
 # Module einbinden
 module "ansible" {
   source         = "./modules/ansible"
-  vm_name        = "ansible-control-node-1"
-  vm_id          = 101
-  proxmox_node   = "proxmox-ve"
-  cores          = 1
-  memory         = 1024
+  vm_name        = var.vm_name
+  vm_id          = var.vm_id
+  proxmox_node   = var.vm_proxmox_node
+  cores          = var.vm_cores
+  memory         = var.vm_memory
   network_bridge = "vmbr0"
-  ip             = "172.16.0.5/16"
+  ip             = var.vm_ip
+  ssh_keys       = var.ssh_keys
 }
