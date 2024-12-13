@@ -27,3 +27,15 @@ module "ansible" {
   ip             = var.vm_ip
   ssh_keys       = var.ssh_keys
 }
+
+module "OPNsense" {
+  source         = "./modules/OPNsense"
+  vm_name        = var.vm_name
+  vm_id          = var.vm_id
+  proxmox_node   = var.vm_proxmox_node
+  cores          = var.vm_cores
+  memory         = var.vm_memory
+  network_bridge = "vmbr0"
+  ip             = var.vm_ip
+  ssh_keys       = var.ssh_keys
+}
