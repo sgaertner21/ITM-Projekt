@@ -18,24 +18,24 @@ provider "proxmox" {
 # Module einbinden
 module "ansible" {
   source         = "./modules/ansible"
-  vm_name        = var.vm_name
-  vm_id          = var.vm_id
-  proxmox_node   = var.vm_proxmox_node
-  cores          = var.vm_cores
-  memory         = var.vm_memory
+  vm_name        = var.ansible_vm_name
+  vm_id          = var.ansible_vm_id
+  proxmox_node   = var.ansible_vm_proxmox_node
+  cores          = var.ansible_vm_cores
+  memory         = var.ansible_vm_memory
   network_bridge = "vmbr0"
-  ip             = var.vm_ip
-  ssh_keys       = var.ssh_keys
+  ip             = var.ansible_vm_ip
+  ssh_keys       = var.ansible_ssh_keys
 }
 
 module "OPNsense" {
   source         = "./modules/OPNsense"
-  vm_name        = var.vm_name
-  vm_id          = var.vm_id
-  proxmox_node   = var.vm_proxmox_node
-  cores          = var.vm_cores
-  memory         = var.vm_memory
+  vm_name        = var.opnsense_vm_name
+  vm_id          = var.opnsense_vm_id
+  proxmox_node   = var.opnsense_vm_proxmox_node
+  cores          = var.opnsense_vm_cores
+  memory         = var.opnsense_vm_memory
   network_bridge = "vmbr0"
-  ip             = var.vm_ip
-  ssh_keys       = var.ssh_keys
+  ip             = var.opnsense_vm_ip
+  ssh_keys       = var.opnsense_ssh_keys
 }
