@@ -14,10 +14,6 @@ sed -i '' -e '/pkg unlock/d' opnsense-bootstrap.sh
 # Run the OPNsense bootstrap script
 sh ./opnsense-bootstrap.sh -r 24.7 -y
 
-# Install the cloud-init package
-pkg install -y py311-cloud-init-24.1.4_2
-echo 'cloudinit_enable="YES"' >> /etc/rc.conf
-
 # Remove IPv6 configuration from WAN
 sed -i '' -e '/<ipaddrv6>dhcp6<\/ipaddrv6>/d' /usr/local/etc/config.xml
 
@@ -28,19 +24,17 @@ sed -i '' -e '/<track6-interface>wan<\/track6-interface>/d' /usr/local/etc/confi
 sed -i '' -e '/<track6-prefix-id>0<\/track6-prefix-id>/d' /usr/local/etc/config.xml
 
 # Enable SSH by default
-sed -i '' -e '/<group>admins<\/group>/r files/ssh.xml' /usr/local/etc/config.xml
+sed -i '' -e '/<group>admins<\/group>/r /tmp/ssh.xml' /usr/local/etc/config.xml
 
 # Allow SSH on all interfaces
-sed -i '' -e '/<filter>/r files/filter.xml' /usr/local/etc/config.xml
+sed -i '' -e '/<filter>/r /tmp/filter.xml' /usr/local/etc/config.xml
 
 # Do not block private networks on WAN
 sed -i '' -e '/<blockpriv>1<\/blockpriv>/d' /usr/local/etc/config.xml
 
-# Display helpful message for the user",
-echo '#####################################################'
-echo '#                                                   #'
-echo '#  OPNsense provisioning finished - shutting down.  #'
-echo '#                                                   #'
-echo '#####################################################'
-
-shutdown -p +20s
+# Display helpful message for the user
+echo '##############################################################'
+echo '#                                                            #'
+echo '#  OPNsense provisioning finished - Consider shutting down.  #'
+echo '#                                                            #'
+echo '##############################################################'

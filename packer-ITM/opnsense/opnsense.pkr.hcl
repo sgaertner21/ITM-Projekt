@@ -161,8 +161,27 @@ build {
     name = "opnsense"
     sources = ["source.proxmox-iso.opnsense"]
 
+    provisioner "file" {
+        sources = [
+            "./files/filter.xml",
+            "./files/ssh.xml"
+            ]
+        destination = "/tmp/"
+    }
+
     provisioner "shell" {
         script = "./scripts/opnsense_provision.sh"
+    }
+
+    provisioner "shell" {
+        inline = [
+            "pkg install -y py311-cloud-init-24.1.4_2",
+            "echo 'cloudinit_enable=\"YES\"' >> /etc/rc.conf",
+            "sudo rm /etc/ssh/ssh_host_*",
+            "sudo truncate -s 0 /etc/machine-id",
+            "sudo cloud-init clean",
+            "shutdown -p +20s"
+        ]
         expect_disconnect = true
     }
 }

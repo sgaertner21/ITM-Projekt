@@ -1,18 +1,28 @@
 terraform {
         required_providers {
-                proxmox = {
+                telmate-proxmox = {
                         source = "telmate/proxmox"
                         version = "3.0.1-rc4"
+                }
+                bpg-proxmox = {
+                        source = "bpg/proxmox"
+                        version = "0.69.0"
                 }
         }
 }
 
-provider "proxmox" {
+provider "telmate-proxmox" {
 
         pm_api_url= var.proxmox_api_url
         pm_api_token_id = var.proxmox_api_token_id
         pm_api_token_secret = var.proxmox_api_token_secret
         pm_tls_insecure = true
+}
+
+provider "bpg-proxmox" {
+        endpoint = var.proxmox_api_url
+        api_token = "${var.proxmox_api_token_id}=${var.proxmox_api_token_secret}"
+        insecure  = true
 }
 
 # Module einbinden
@@ -32,10 +42,15 @@ module "OPNsense" {
   source         = "./modules/OPNsense"
   vm_name        = var.opnsense_vm_name
   vm_id          = var.opnsense_vm_id
-  proxmox_node   = var.opnsense_vm_proxmox_node
-  cores          = var.opnsense_vm_cores
-  memory         = var.opnsense_vm_memory
-  network_bridge = "vmbr0"
-  ip             = var.opnsense_vm_ip
-  ssh_keys       = var.opnsense_ssh_keys
+  proxmox_node   = var.opnsense_proxmox_node
+  cores          = var.opnsense_cores
+  memory         = var.opnsense_memory
+  proxmox_ve_network_bridge_wan = var.opnsense_proxmox_ve_network_bridge_wan
+  proxmox_ve_network_bridge_lan = var.opnsense_proxmox_ve_network_bridge_lan
+  vm_network_interface_wan = var.opnsense_vm_network_interface_wan
+  vm_network_interface_lan = var.opnsense_vm_network_interface_lan
+  vm_lan_ip = var.opnsense_vm_lan_ip
+  vm_wan_ip = var.opnsense_vm_wan_ip
+  proxmox_lan_ip = var.proxmox_lan_ip
+  vm_dns_server = var.opnsense_vm_dns_server
 }

@@ -1,0 +1,29 @@
+#cloud-config
+runcmd:
+  - |
+    sed -i '' -e '/<firmware/,/<\/firmware>/ {
+      /<\/firmware>/a\    <dnsserver>${vm_dns_server}</dnsserver>
+    }' /conf/config.xml
+  - |
+    sed -i '' -e '
+    /<interfaces>/,/<\/interfaces>/ {
+      /<wan>/,/<\/wan>/ {
+        s/<if>[^<]*<\/if>/<if>${vm_network_interface_wan}<\/if>/
+        s/<ipaddr>dhcp<\/ipaddr>/<ipaddr>${vm_wan_ip}<\/ipaddr>/
+        s/<subnet\/>/<subnet>${vm_wan_subnet_cidr}<\/subnet>/
+        s/<gateway\/>/<gateway>WAN_GW<\/gateway>/
+        s/<ipaddrv6>dhcp6<\/ipaddrv6>/<ipaddrv6\/>/
+        /<\/blockpriv>/a\      <subnetv6\/>\n      <gatewayv6\/>
+      }
+      /<lan>/,/<\/lan>/ {
+        s/<if>[^<]*<\/if>/<if>${vm_network_interface_lan}<\/if>/
+        s/<ipaddr>[^<]*<\/ipaddr>/<ipaddr>${vm_lan_ip}<\/ipaddr>/
+        /<\/mediaopt>/a\      <gateway\/>\n      <ipaddrv6\/>\n      <subnetv6\/>\n      <gatewayv6\/>
+      }
+    }' /conf/config.xml
+  - lan_net=$(echo "${vm_lan_ip}" | sed 's/\.[0-9]*$//')
+  - sed -i '' -e "s/192\.168\.1\./$${lan_net}./" /conf/config.xml
+  - sed -i '' -e '/<blockpriv>1<\\/blockpriv>/d' /conf/config.xml
+power_state:
+    mode: reboot
+    message: Rebooting to apply configuration changes
