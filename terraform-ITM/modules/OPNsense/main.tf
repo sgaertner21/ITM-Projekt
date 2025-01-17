@@ -50,10 +50,11 @@ resource "proxmox_vm_qemu" "OPNsense_vm" {
         # Hardware-Spezifikationen
         full_clone = true
         clone = "OPNsense-template"
-        agent = 0
+        agent = 1
         memory = var.memory
         cores = var.cores
         scsihw = "lsi"
+        onboot = "true"
 
         # Speicher VM
         disk {

@@ -177,6 +177,8 @@ build {
         inline = [
             "pkg install -y py311-cloud-init-24.1.4_2",
             "echo 'cloudinit_enable=\"YES\"' >> /etc/rc.conf",
+            "pkg install -y qemu-guest-agent",
+            "echo 'qemu_guest_agent_enable=\"YES\"' >> /etc/rc.conf",
             "sudo rm /etc/ssh/ssh_host_*",
             "sudo truncate -s 0 /etc/machine-id",
             "sudo cloud-init clean",
