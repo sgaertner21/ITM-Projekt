@@ -1,0 +1,55 @@
+- name: Set up BIND-DNS server
+  become: true
+  hosts: bind9-test
+  roles:
+    - role: bertvv.bind
+      vars:
+        bind_allow_query:
+          - any
+        bind_listen_ipv4:
+          - any
+        bind_zones:
+          - name: itm.internal
+            create_reverse_zones: true
+            primaries:
+              - "{{ hostvars['bind9-test'].ansible_host }}"
+            name_servers:
+              - ns.itm.internal.
+            hosts:
+              - name: ns
+                ip: "{{ hostvars['bind9-test'].ansible_host }}"
+                aliases:
+                  - ns1
+            networks:
+              - '172.18.0'
+            allow_update:
+              - 172.18.0.1
+        bind_recursion: true
+        bind_forwarders:
+          - 9.9.9.9
+          - 1.1.1.1
+        bind_dnssec_enable: false
+        bind_dns_keys:
+          - name: opnsense
+            algorithm: hmac-sha512
+            secret: "yawQV7dZ1nnHSUuMWcucv1E/dIaQVegJzb228RpJdQe/WYQaiz0+aEbFOTE3OqV2qGxNZxoRZ0PsJ7VjQZjbnQ=="
+        bind_extra_include_files:
+          - "{{ bind_auth_file }}"
+
+- name: Configure OPNsense for dynamic DNS updates
+  hosts: opnsense-test
+  tasks:
+    - name: Change config.xml OPNsense
+      community.general.xml:
+        path: /conf/config.xml
+        xpath: /opnsense/dhcpd/lan/enable
+        state: present
+        value: |
+          <enable>1</enable>
+          <ddnsdomain>itm.internal</ddnsdomain>
+          <ddnsdomainprimary>{{ hostvars['bind9-test'].ansible_host }}</ddnsdomainprimary>
+          <ddnsdomainkeyname>opnsense</ddnsdomainkeyname>
+          <ddnsdomainkey>yawQV7dZ1nnHSUuMWcucv1E/dIaQVegJzb228RpJdQe/WYQaiz0+aEbFOTE3OqV2qGxNZxoRZ0PsJ7VjQZjbnQ==</ddnsdomainkey>
+          <ddnsdomainalgorithm>hmac-sha512</ddnsdomainalgorithm>
+          <ddnsupdate>1</ddnsupdate>
+      register: xml_result

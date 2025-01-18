@@ -1,0 +1,20 @@
+plugin: community.general.proxmox
+
+url: 'https://172.16.0.10:8006'
+user: ansible@pve
+token_id: ansible
+token_secret: 30bc16b6-76b8-4d97-8b8a-4f84222028d8
+want_facts: true
+qemu_extended_statuses: true
+validate_certs: false
+want_proxmox_nodes_ansible_host: false
+strict: false
+compose:
+    ansible_host: >
+        proxmox_agent_interfaces
+        | selectattr('ip-addresses', 'defined')
+        | map(attribute='ip-addresses')
+        | map('select', 'match', '^172\.18\.0\..*')
+        | flatten
+        | map('regex_replace', '/.*$', '')
+        | first
