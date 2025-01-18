@@ -63,3 +63,8 @@ variable "proxmox_lan_ip" {
 variable "vm_dns_server" {
     type    = string
 }
+
+variable "ssh_keys" {
+    description = "SSH-Keys für den User ansible"
+    type        = list(string)
+}

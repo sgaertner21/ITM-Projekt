@@ -27,30 +27,42 @@ provider "bpg-proxmox" {
 
 # Module einbinden
 module "ansible" {
-  source         = "./modules/ansible"
-  vm_name        = var.ansible_vm_name
-  vm_id          = var.ansible_vm_id
-  proxmox_node   = var.ansible_vm_proxmox_node
-  cores          = var.ansible_vm_cores
-  memory         = var.ansible_vm_memory
-  network_bridge = "vmbr0"
-  ip             = var.ansible_vm_ip
-  ssh_keys       = var.ansible_ssh_keys
+        source         = "./modules/ansible"
+        vm_name        = var.ansible_vm_name
+        vm_id          = var.ansible_vm_id
+        proxmox_node   = var.ansible_proxmox_node
+        cores          = var.ansible_vm_cores
+        memory         = var.ansible_vm_memory
+        network_bridge = "vmbr0"
+        ip             = var.ansible_vm_ip
+        ssh_keys       = var.ansible_ssh_keys
 }
 
 module "OPNsense" {
-  source         = "./modules/OPNsense"
-  vm_name        = var.opnsense_vm_name
-  vm_id          = var.opnsense_vm_id
-  proxmox_node   = var.opnsense_proxmox_node
-  cores          = var.opnsense_cores
-  memory         = var.opnsense_memory
-  proxmox_ve_network_bridge_wan = var.opnsense_proxmox_ve_network_bridge_wan
-  proxmox_ve_network_bridge_lan = var.opnsense_proxmox_ve_network_bridge_lan
-  vm_network_interface_wan = var.opnsense_vm_network_interface_wan
-  vm_network_interface_lan = var.opnsense_vm_network_interface_lan
-  vm_lan_ip = var.opnsense_vm_lan_ip
-  vm_wan_ip = var.opnsense_vm_wan_ip
-  proxmox_lan_ip = var.proxmox_lan_ip
-  vm_dns_server = var.opnsense_vm_dns_server
+        source         = "./modules/OPNsense"
+        vm_name        = var.opnsense_vm_name
+        vm_id          = var.opnsense_vm_id
+        proxmox_node   = var.opnsense_proxmox_node
+        cores          = var.opnsense_cores
+        memory         = var.opnsense_memory
+        proxmox_ve_network_bridge_wan = var.opnsense_proxmox_ve_network_bridge_wan
+        proxmox_ve_network_bridge_lan = var.opnsense_proxmox_ve_network_bridge_lan
+        vm_network_interface_wan = var.opnsense_vm_network_interface_wan
+        vm_network_interface_lan = var.opnsense_vm_network_interface_lan
+        vm_lan_ip = var.opnsense_vm_lan_ip
+        vm_wan_ip = var.opnsense_vm_wan_ip
+        proxmox_lan_ip = var.proxmox_lan_ip
+        vm_dns_server = var.opnsense_vm_dns_server
+        ssh_keys = var.bind9_ssh_keys
+}
+
+module "bind9" {
+        source         = "./modules/bind9"
+        vm_name        = var.bind9_vm_name
+        vm_id          = var.bind9_vm_id
+        proxmox_node   = var.bind9_proxmox_node
+        cores          = var.bind9_vm_cores
+        memory         = var.bind9_vm_memory
+        network_bridge = "vmbr1"
+        ssh_keys       = var.bind9_ssh_keys
 }
