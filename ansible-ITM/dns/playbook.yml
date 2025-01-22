@@ -1,6 +1,8 @@
 - name: Set up BIND-DNS server
   become: true
   hosts: bind9-test
+  tags:
+    - dns
   roles:
     - role: bertvv.bind
       vars:
@@ -36,20 +38,34 @@
         bind_extra_include_files:
           - "{{ bind_auth_file }}"
 
+# - name: Configure OPNsense static DHCP lease for BIND-DNS server
+#   hosts: opnsense-test
+#   tags:
+#     - opnsense
+#   remote_user: root
+#   tasks:
+#     - name: 
+
 - name: Configure OPNsense for dynamic DNS updates
   hosts: opnsense-test
+  tags:
+    - opnsense
+  remote_user: root
   tasks:
     - name: Change config.xml OPNsense
       community.general.xml:
         path: /conf/config.xml
-        xpath: /opnsense/dhcpd/lan/enable
+        xpath: /opnsense/dhcpd/lan/{{ item.key }}
         state: present
-        value: |
-          <enable>1</enable>
-          <ddnsdomain>itm.internal</ddnsdomain>
-          <ddnsdomainprimary>{{ hostvars['bind9-test'].ansible_host }}</ddnsdomainprimary>
-          <ddnsdomainkeyname>opnsense</ddnsdomainkeyname>
-          <ddnsdomainkey>yawQV7dZ1nnHSUuMWcucv1E/dIaQVegJzb228RpJdQe/WYQaiz0+aEbFOTE3OqV2qGxNZxoRZ0PsJ7VjQZjbnQ==</ddnsdomainkey>
-          <ddnsdomainalgorithm>hmac-sha512</ddnsdomainalgorithm>
-          <ddnsupdate>1</ddnsupdate>
-      register: xml_result
+        pretty_print: true
+        value: "{{ item.value }}"
+      loop: "{{ xml_entries | dict2items }}"
+      vars:
+        xml_entries:
+          enable: "1"
+          ddnsdomain: itm.internal
+          ddnsdomainprimary: "{{ hostvars['bind9-test'].ansible_host }}"
+          ddnsdomainkeyname: opnsense
+          ddnsdomainkey: yawQV7dZ1nnHSUuMWcucv1E/dIaQVegJzb228RpJdQe/WYQaiz0+aEbFOTE3OqV2qGxNZxoRZ0PsJ7VjQZjbnQ==
+          ddnsdomainalgorithm: hmac-sha512
+          ddnsupdate: "1"
