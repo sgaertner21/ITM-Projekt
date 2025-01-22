@@ -29,22 +29,13 @@ runcmd:
           <gatewayv6\/>
       }
     }' /conf/config.xml
+    
+  # Scheint noch nicht zu funktionieren
   - |
     sed -i '' -E -e '
-    /<system>/,/<\/system>/ {
-      /<\/user>/a\
-        <user>\
-          <password>$2y$11$C8J\/pBaz48M2wjpKxmXtSOML3OIjHsnnFdgrCuo9c5bFPk2NSKkBW<\/password>\
-          <scope>user<\/scope>\
-          <name>ansible<\/name>\
-          <descr\/>\
-          <expires\/>\
-          <authorizedkeys>${ssh_keys_base64}<\/authorizedkeys>\
-          <otp_seed\/>\
-          <comment>User for ansible provisioning<\/comment>\
-          <uid>2000<\/uid>\
-          <shell>\/bin\/sh<\/shell>\
-        <\/user>
+    /<user>/,/<\/user>/ {
+      /<expires\/>/a\
+          <authorizedkeys>${ssh_keys_base64}<\/authorizedkeys>
     }' /conf/config.xml
   - lan_net=$(echo "${vm_lan_ip}" | sed 's/\.[0-9]*$//')
   - sed -i '' -e "s/192\.168\.1\./$${lan_net}./" /conf/config.xml
