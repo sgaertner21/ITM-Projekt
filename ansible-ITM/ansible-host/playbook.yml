@@ -13,6 +13,11 @@
         state: present
         name:
           - python3-httpx
+
+
+- name: Install Ansible Galaxy Requirements
+  hosts: localhost
+  tasks:
     - name: Install Ansible Galaxy Requirements
       community.general.ansible_galaxy_install:
         requirements_file: requirements.yml

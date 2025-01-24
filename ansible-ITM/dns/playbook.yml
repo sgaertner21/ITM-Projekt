@@ -1,33 +1,3 @@
-- name: Get the MAC address
-  tags:
-    - test
-  tasks:
-    - name: Debug
-      ansible.builtin.debug: 
-        msg: "{{ hostvars[inventory_hostname] }}"
-
-- name: Configure OPNsense static DHCP lease for BIND-DNS server
-  hosts: opnsense-test
-  tags:
-    - opnsense
-  connection: local
-  module_defaults:
-    ansibleguy.opnsense.alias:
-      firewall: "{{ hostvars['opnsense-test'].ansible_host }}"
-      ssl_verify: false
-      api_key: 7Iu+9xxO9w4fwA+Va8tOIRhW4jnLI6GPdzIQr+g8OkAJQy4IG5Uhjt2y619xExDtOUoQ3fqkJ5Aegkuv
-      api_secret: YwiI4gP4JifldHQH8h+/rK1fTadpz8F0pea97+RfcJ/mTE3hvSSpXQVoWtLm998ssiJ+15MtJG09Ib3L
-  tasks:
-    - name: Add a DHCP reservation
-      ansibleguy.opnsense.dhcp_reservation:
-        ip: '172.18.0.18'
-        mac: "{{ hostvars['bind9-test'].ansible_mac }}"
-        subnet: '172.18.0.0/24'
-        hostname: 'example-host'
-        description: 'Static lease for example-host'
-        state: present
-        reload: true
-
 - name: Set up BIND-DNS server
   become: true
   hosts: bind9-test
@@ -69,7 +39,7 @@
           - "{{ bind_auth_file }}"
 
 - name: Install prerequisites
-  ansible.builtin.import_playbook: install_prerequisites.yml
+  ansible.builtin.import_playbook: ../opnsense/install_prerequisites.yml
 
 - name: Configure OPNsense for dynamic DNS updates
   hosts: opnsense-test
