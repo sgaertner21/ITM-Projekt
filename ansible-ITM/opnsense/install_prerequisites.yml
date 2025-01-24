@@ -1,0 +1,20 @@
+- name: Install required packages for xml module
+
+  hosts: opnsense-test
+  remote_user: root
+  tasks:
+    - name: Install required packages for lxml
+      ansible.builtin.package:
+        name:
+          - libxml2
+          - libxslt
+        state: present
+    - name: Install pip
+      ansible.builtin.command:
+        cmd: python3 -m ensurepip
+      register: pip_install_result
+      changed_when: "'Requirement already satisfied: pip' not in pip_install_result.stdout"
+    - name: Install lmxl
+      ansible.builtin.pip:
+        name: lxml
+        state: present

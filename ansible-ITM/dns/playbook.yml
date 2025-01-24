@@ -46,6 +46,9 @@
 #   tasks:
 #     - name: 
 
+- name: Install prerequisites
+  ansible.builtin.import_playbook: install_prerequisites.yml
+
 - name: Configure OPNsense for dynamic DNS updates
   hosts: opnsense-test
   tags:
