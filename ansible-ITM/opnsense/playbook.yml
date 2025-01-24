@@ -38,7 +38,19 @@
         pretty_print: true
         value: "2000"
 
-    # API Key hinterlegen
+    - name: Add OPNsense Ansible User API key
+      community.general.xml:
+        path: /conf/config.xml
+        xpath: "/opnsense/system/user[name='ansible']/apikeys/\
+          item[key='7Iu+9xxO9w4fwA+Va8tOIRhW4jnLI6GPdzIQr+g8OkAJQy4IG5Uhjt2y619xExDtOUoQ3fqkJ5Aegkuv']/{{ item.key }}"
+        state: present
+        pretty_print: true
+        value: "{{ item.value }}"
+      loop: "{{ xml_entries | dict2items }}"
+      vars:
+        xml_entries:
+          key: 7Iu+9xxO9w4fwA+Va8tOIRhW4jnLI6GPdzIQr+g8OkAJQy4IG5Uhjt2y619xExDtOUoQ3fqkJ5Aegkuv
+          secret: $6$9641RQm94YCf20AH$yAVZNoV7iN2mrihs6fA8CLvlKcCzyV.QraGuhHvYGWXMxfgzDjVJ1u2PYv4VpW2IfKgyz5bfDYk0b2veU3j4k/
 
     - name: Reload configuration
       changed_when: false

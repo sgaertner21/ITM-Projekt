@@ -1,0 +1,19 @@
+- name: Install prerequisites
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Install required packages for bertvv.bind
+      ansible.builtin.package:
+        state: present
+        name:
+          - python3-netaddr
+          - python3-dnspython
+    - name: Install required packages for ansibleguy.opnsense
+      ansible.builtin.package:
+        state: present
+        name:
+          - python3-httpx
+    - name: Install Ansible Galaxy Requirements
+      community.general.ansible_galaxy_install:
+        requirements_file: requirements.yml
+        type: both

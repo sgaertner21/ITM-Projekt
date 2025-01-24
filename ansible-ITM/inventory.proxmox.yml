@@ -18,3 +18,9 @@ compose:
         | flatten
         | map('regex_replace', '/.*$', '')
         | first
+    ansible_mac_address: >
+        proxmox_agent_interfaces
+        | selectattr('ip-addresses', 'defined')
+        | selectattr('ip-addresses', 'select', 'match', '^172\.18\.0\..*')
+        | map(attribute='mac-address')
+        | first
