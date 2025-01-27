@@ -40,7 +40,6 @@ variable "ip" {
 variable "gateway" {
   description = "Gateway der VM"
   type        = string
-  default     = "172.16.0.1"
 }
 
 variable "network_bridge" {
