@@ -31,6 +31,11 @@ variable "ansible_vm_ip" {
         type = string  
 }
 
+variable "ansible_vm_gateway" {
+  description = "Gateway der VM"
+  type        = string
+}
+
 variable "ansible_ip_address_filter_for_connection" {
         description = "Regex für IP-Adressen, die Ansible benutzen darf um sich zu verbinden"
         type = string
