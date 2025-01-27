@@ -28,6 +28,22 @@ resource "proxmox_cloud_init_disk" "ansible_cloud_init" {
     instance-id = sha1(var.vm_name)
   })
 
+  network_config = yamlencode({
+    version = 1
+    config = [{
+      type = "physical"
+      name = "net0"
+      subnets = [{
+        type = "static"
+        address = "${var.ip}"
+        gateway = "${var.gateway}"
+        dns_nameservers = [
+          "${var.nameserver}"
+        ]
+      }]
+      }]
+  })
+
   user_data = <<-EOT
   #cloud-config
   users: 
@@ -60,8 +76,6 @@ resource "proxmox_vm_qemu" "ansible" {
   cores = var.cores
   scsihw = "virtio-scsi-pci"
   os_type = "ubuntu"
-  nameserver = var.nameserver
-  ipconfig0 = "ip=${var.ip},gw=${var.gateway}"
 
   # Cloud-Init disk
   disk {
