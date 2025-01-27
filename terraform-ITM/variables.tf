@@ -1,5 +1,5 @@
-variable "proxmox_api_url" {
-        description = "URL des Proxmox API-Endpunkts"
+variable "proxmox_url" {
+        description = "URL des Proxmox-Servers"
         type = string
 }
 

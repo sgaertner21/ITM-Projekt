@@ -62,5 +62,4 @@ variable "proxmox_url" {
 variable "ip_regex" {
   description = "Regulärer Ausdruck für die IP-Adresse"
   type        = string
-  default     = "172\.18\.0\."
 }

@@ -35,3 +35,8 @@ variable "ansible_vm_ip" {
         description = "IP-Adresse der VM"
         type = string  
 }
+
+variable "ansible_ip_address_filter_for_connection" {
+        description = "Regex für IP-Adressen, die Ansible benutzen darf um sich zu verbinden"
+        type = string
+}
