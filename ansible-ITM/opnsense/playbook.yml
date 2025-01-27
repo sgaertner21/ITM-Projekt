@@ -17,18 +17,14 @@
       loop: "{{ xml_entries | dict2items }}"
       vars:
         xml_entries:
-          password: $2y$11$C8J/pBaz48M2wjpKxmXtSOML3OIjHsnnFdgrCuo9c5bFPk2NSKkBW
+          password: lookup('community.general.random_string', base64=true, length=16)
           scope: user
           name: ansible
           authorizedkeys: "{{ ssh_keys | b64encode }}"
           comment: User for ansible provisioning
           uid: 2000
           shell: /bin/sh
-        ssh_keys: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDh7jawvxyprC5dGxPiUxtj8/6aj7yoV+UEu2yOq9HMCiTdKLcjv0ZZIdghcDSpRHwS8LhsL3XF3eS6rPWQJlBteEwMbZm7OUmop6Hk\
-          mw+l2YYojT4QVu2ofgc7WbqTWUeGwUUTQFNeNtah3gKi408sG4dOgHbzqM8d/gkfR15k3Aw6CInE8SfG0AIsfRP/J3koRkuy8RUS7UBIqGhYVStjV/ddZgyuf818ugPOXmLpP8tbaodHrkoCDa\
-          /mvjaeXt15XwFPsrVaRhHDii6f5K8aNst7BQ9bofaUDXlwDXyYMd/DA/6JkozofkCnKEVsXhyu6cTfQUIhZVaJFWiYjqm4OdKRANh04JKpADQlCtdF81ee4rNg2+YrESnaxK3Zpt51mNqwCN2lzWF\
-          /selu0drEYBqQ/nNoEVH5Vykj44ih0L4n4pHgwrt9DOp1Yx4lpeAe1hm+tthf2TdaUgoJ9hJEtAs0FZMQG7R4CnzwYrTnpJ99zOwQJ8foO9fbV98Ny2E= justin@DESKTOP-UHJHBBL\r\n\
-          ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMNR9W6rfP4f/ex6he6AhQTxR8+5zjaTkJWt17aWEF/H ansible@ansible-control-node-1"
+        ssh_keys: "{{ var_ansible_public_ssh_key }}"
 
     - name: Add OPNsense Ansible User to Admin-Group
       community.general.xml:
@@ -42,15 +38,15 @@
       community.general.xml:
         path: /conf/config.xml
         xpath: "/opnsense/system/user[name='ansible']/apikeys/\
-          item[key='7Iu+9xxO9w4fwA+Va8tOIRhW4jnLI6GPdzIQr+g8OkAJQy4IG5Uhjt2y619xExDtOUoQ3fqkJ5Aegkuv']/{{ item.key }}"
+          item[key='{{ var_ansible_opnsense_api_key }}']/{{ item.key }}"
         state: present
         pretty_print: true
         value: "{{ item.value }}"
       loop: "{{ xml_entries | dict2items }}"
       vars:
         xml_entries:
-          key: 7Iu+9xxO9w4fwA+Va8tOIRhW4jnLI6GPdzIQr+g8OkAJQy4IG5Uhjt2y619xExDtOUoQ3fqkJ5Aegkuv
-          secret: $6$9641RQm94YCf20AH$yAVZNoV7iN2mrihs6fA8CLvlKcCzyV.QraGuhHvYGWXMxfgzDjVJ1u2PYv4VpW2IfKgyz5bfDYk0b2veU3j4k/
+          key: "{{ var_ansible_opnsense_api_key }}"
+          secret: "{{ var_ansible_opnsense_api_secret}}"
 
     - name: Reload configuration
       changed_when: false

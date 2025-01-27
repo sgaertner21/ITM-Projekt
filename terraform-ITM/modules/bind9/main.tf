@@ -22,7 +22,7 @@ resource "proxmox_vm_qemu" "bind9" {
   os_type = "cloud-init"
   ciuser = "ansible"
   sshkeys = join("\n", var.ssh_keys)
-  ipconfig0 = "ip=dhcp"
+  ipconfig0 = "ip=${var.ip},gw=${var.gateway}"
 
   # Speicher Cloud-Init
   disk {

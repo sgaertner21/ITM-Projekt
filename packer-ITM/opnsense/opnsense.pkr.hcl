@@ -179,7 +179,6 @@ build {
             "echo 'cloudinit_enable=\"YES\"' >> /etc/rc.conf",
             "pkg install -y qemu-guest-agent",
             "echo 'qemu_guest_agent_enable=\"YES\"' >> /etc/rc.conf",
-            "pkg install -y libxml2 libxslt",
             "sudo rm /etc/ssh/ssh_host_*",
             "sudo truncate -s 0 /etc/machine-id",
             "sudo cloud-init clean",

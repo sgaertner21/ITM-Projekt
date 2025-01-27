@@ -53,3 +53,14 @@ variable "ssh_keys" {
   description = "SSH-Keys für den User ansible"
   type        = list(string)
 }
+
+variable "proxmox_url" {
+  description = "URL des Proxmox-Servers"
+  type        = string
+}
+
+variable "ip_regex" {
+  description = "Regulärer Ausdruck für die IP-Adresse"
+  type        = string
+  default     = "172\.18\.0\."
+}
