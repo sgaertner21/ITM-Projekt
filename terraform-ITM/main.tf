@@ -35,7 +35,7 @@ module "ansible" {
         memory          = var.ansible_vm_memory
         network_bridge  = "vmbr0"
         ip              = var.ansible_vm_ip
-        ssh_keys        = concat(file("~/.ssh/id_rsa.pub"), var.ssh_keys)
+        ssh_keys        = concat([file("~/.ssh/id_rsa.pub")], var.ssh_keys)
         ip_regex        = var.ansible_ip_address_filter_for_connection
         proxmox_url     = var.proxmox_url
 }
@@ -55,7 +55,7 @@ module "OPNsense" {
         vm_wan_ip       = var.opnsense_vm_wan_ip
         proxmox_lan_ip  = var.proxmox_lan_ip
         vm_dns_server   = var.opnsense_vm_dns_server
-        ssh_keys        = concat(module.ansible.public_ssh_key, var.opnsense_additional_ssh_keys)
+        ssh_keys        = concat([module.ansible.public_ssh_key], var.opnsense_additional_ssh_keys)
 }
 
 module "bind9" {
@@ -66,7 +66,7 @@ module "bind9" {
         cores           = var.bind9_vm_cores
         memory          = var.bind9_vm_memory
         network_bridge  = "vmbr1"
-        ssh_keys        = concat(module.ansible.public_ssh_key, var.ssh_keys)
+        ssh_keys        = concat([module.ansible.public_ssh_key], var.ssh_keys)
         ip              = var.bind9_vm_ip
         gateway         = var.bind9_vm_gateway
 }
