@@ -4,6 +4,14 @@ terraform {
                         source = "telmate/proxmox"
                         version = "3.0.1-rc4"
                 }
+                tls = {
+                        source = "hashicorp/tls"
+                        version = "4.0.6"
+                }
+                bpg-proxmox = {
+                        source = "bpg/proxmox"
+                        version = "0.69.0"
+                }
         }
 }
 
@@ -117,17 +125,23 @@ resource "tls_private_key" "ansible" {
 }
 
 resource "proxmox_virtual_environment_user" "ansible_user" {
+    provider = bpg-proxmox
+
     user_id = "ansible@pve"
     comment = "User for Ansible dynamic inventory"
 }
 
 resource "proxmox_virtual_environment_user_token" "ansible_api" {
+    provider = bpg-proxmox
+
     token_name = "ansible"
     user_id = proxmox_virtual_environment_user.ansible_user.id
     privileges_separation = true
 }
 
 resource "proxmox_virtual_environment_acl" "ansible_api_acl" {
+    provider = bpg-proxmox
+
     path = "/"
     role_id = "Administrator"
     propagate = true
