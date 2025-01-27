@@ -69,4 +69,6 @@ module "bind9" {
         ssh_keys        = concat([module.ansible.public_ssh_key], var.ssh_keys)
         ip              = var.bind9_vm_ip
         gateway         = var.bind9_vm_gateway
+
+        depends_on = [module.OPNsense]
 }

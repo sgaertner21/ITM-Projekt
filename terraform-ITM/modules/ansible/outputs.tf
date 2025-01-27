@@ -10,5 +10,5 @@ output "public_ssh_key" {
 
 output "private_ssh_key" {
   description = "Private-SSH-Key der virtuellen Maschine"
-  value       = tls_private_key.ansible.privat_key_openssh
+  value       = tls_private_key.ansible.private_key_openssh
 }

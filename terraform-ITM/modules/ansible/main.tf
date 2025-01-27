@@ -15,6 +15,10 @@ terraform {
         }
 }
 
+locals {
+  ssh_keys = join( ",", var.ssh_keys)
+}
+
 resource "proxmox_cloud_init_disk" "ansible_cloud_init" {
   name = var.vm_name
   pve_node = var.proxmox_node
@@ -28,7 +32,7 @@ resource "proxmox_cloud_init_disk" "ansible_cloud_init" {
   #cloud-config
   users: 
     - name: ansible
-      ssh-authorized-keys: ${var.ssh_keys}
+      ssh-authorized-keys: [${local.ssh_keys}]
       sudo: ['ALL=(ALL) NOPASSWD:ALL']
       groups: sudo
       shell: /bin/bash
@@ -96,12 +100,12 @@ resource "proxmox_vm_qemu" "ansible" {
 
   # Ansible Inventory
   provisioner "file" {
-    source = "${path}/ansible/"
+    source = "${path.root}/ansible/"
     destination = "/root/ansible/"
   }
 
   provisioner "file" {
-    content = templatefile("${module.path}/files/proxmox_inventory.tftpl", {
+    content = templatefile("${path.module}/files/proxmox_inventory.tftpl", {
       proxmox_url = var.proxmox_url
       proxmox_user = proxmox_virtual_environment_user.ansible_user.user_id
       proxmox_token_id = proxmox_virtual_environment_user_token.ansible_api.token_name
