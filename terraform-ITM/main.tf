@@ -35,7 +35,7 @@ module "ansible" {
         memory          = var.ansible_vm_memory
         network_bridge  = "vmbr0"
         ip              = var.ansible_vm_ip
-        ssh_keys        = concat(file("~/.ssh/id_rsa.pub"), var.ansible_ssh_keys)
+        ssh_keys        = concat(file("~/.ssh/id_rsa.pub"), var.ssh_keys)
         ip_regex        = var.ansible_ip_address_filter_for_connection
         proxmox_url     = var.proxmox_url
 }
@@ -66,7 +66,7 @@ module "bind9" {
         cores           = var.bind9_vm_cores
         memory          = var.bind9_vm_memory
         network_bridge  = "vmbr1"
-        ssh_keys        = var.bind9_ssh_keys
+        ssh_keys        = concat(module.ansible.public_ssh_key, var.ssh_keys)
         ip              = var.bind9_vm_ip
         gateway         = var.bind9_vm_gateway
 }

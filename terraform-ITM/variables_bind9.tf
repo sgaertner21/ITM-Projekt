@@ -1,8 +1,3 @@
-variable "bind9_ssh_keys" {
-        description = "SSH-Public-Key für den Zugriff auf die VMs"
-        type = list(string)
-}
-
 variable "bind9_vm_name" {
         description = "Name der VM"
         type = string

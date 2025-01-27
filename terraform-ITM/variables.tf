@@ -14,3 +14,8 @@ variable "proxmox_api_token_secret" {
         type =  string
         sensitive = true
 }
+
+variable "ssh_keys" {
+        description = "SSH-Public-Key für den Zugriff auf die VMs"
+        type = list(string)
+}
