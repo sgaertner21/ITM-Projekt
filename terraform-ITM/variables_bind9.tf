@@ -8,6 +8,16 @@ variable "bind9_vm_name" {
         type = string
 }
 
+variable "bind9_vm_ip" {
+        description = "IP-Adresse der VM"
+        type = string
+}
+
+variable "bind9_vm_gateway" {
+        description = "Gateway-IP-Adresse der VM"
+        type = string
+}
+
 variable "bind9_vm_cores" {
         description = "Anzahl der CPU-Kerne"
         type = number

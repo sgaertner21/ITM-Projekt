@@ -9,6 +9,16 @@ variable "vm_id" {
   nullable = true
 }
 
+variable "ip" {
+  description = "IP-Adresse der VM"
+  type        = string
+}
+
+variable "gateway" {
+  description = "Gateway-IP-Adresse der VM"
+  type        = string
+}
+
 variable "proxmox_node" {
   description = "Proxmox-Node, auf dem die VM läuft"
   type        = string

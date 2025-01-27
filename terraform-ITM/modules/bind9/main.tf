@@ -45,4 +45,6 @@ resource "proxmox_vm_qemu" "bind9" {
     model = "virtio"
     bridge = var.network_bridge
   }
+
+  depends_on = [ module.OPNsense ]
 }

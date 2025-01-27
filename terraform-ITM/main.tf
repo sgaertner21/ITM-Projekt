@@ -67,4 +67,6 @@ module "bind9" {
         memory          = var.bind9_vm_memory
         network_bridge  = "vmbr1"
         ssh_keys        = var.bind9_ssh_keys
+        ip              = var.bind9_vm_ip
+        gateway         = var.bind9_vm_gateway
 }
