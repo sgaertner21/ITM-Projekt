@@ -1,48 +1,63 @@
 terraform {
-        required_providers {
-                proxmox = {
-                        source = "telmate/proxmox"
-                        version = "3.0.1-rc4"
-                }
-                tls = {
-                        source = "hashicorp/tls"
-                        version = "4.0.6"
-                }
-                bpg-proxmox = {
-                        source = "bpg/proxmox"
-                        version = "0.69.0"
-                }
-        }
+  required_providers {
+    proxmox = {
+      source  = "telmate/proxmox"
+      version = "3.0.1-rc4"
+    }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "4.0.6"
+    }
+    bpg-proxmox = {
+      source  = "bpg/proxmox"
+      version = "0.69.0"
+    }
+  }
 }
 
 locals {
-  ssh_keys = join( ",", var.ssh_keys)
+  ssh_keys = join(",", var.ssh_keys)
 }
 
 resource "proxmox_cloud_init_disk" "ansible_cloud_init" {
-  name = var.vm_name
+  name     = var.vm_name
   pve_node = var.proxmox_node
-  storage = "local"
+  storage  = "local"
 
   meta_data = jsonencode({
     instance-id = sha1(var.vm_name)
   })
 
-  network_config = yamlencode({
-    version = 1
-    config = [{
-      type = "physical"
-      name = "net0"
-      subnets = [{
-        type = "static"
-        address = "${var.ip}"
-        gateway = "${var.gateway}"
-        dns_nameservers = [
-          "${var.nameserver}"
-        ]
-      }]
-      }]
-  })
+  # network_config = yamlencode({
+  #   version = 1
+  #   config = [{
+  #     type = "physical"
+  #     name = "net0"
+  #     subnets = [{
+  #       type = "static"
+  #       address = "${var.ip}"
+  #       gateway = "${var.gateway}"
+  #       dns_nameservers = [
+  #         "${var.nameserver}"
+  #       ]
+  #     }]
+  #     }]
+  # })
+
+  network_config = <<-EOT
+  #cloud-config
+  network:
+    version: 2
+    ethernets:
+      enp0s18:
+        dhcp4: false
+        addresses:
+          - ${var.ip}
+        gateway4: ${var.gateway}
+        nameservers:
+          addresses:
+            - ${var.nameserver}
+  EOT
 
   user_data = <<-EOT
   #cloud-config
@@ -64,68 +79,68 @@ resource "proxmox_cloud_init_disk" "ansible_cloud_init" {
 }
 
 resource "proxmox_vm_qemu" "ansible" {
-  name = var.vm_name
-  vmid = var.vm_id
+  name        = var.vm_name
+  vmid        = var.vm_id
   target_node = var.proxmox_node
 
   # Hardware-Spezifikationen
   full_clone = false
-  clone = "ubuntu-server-noble"
-  agent = 1
-  memory = var.memory
-  cores = var.cores
-  scsihw = "virtio-scsi-pci"
-  os_type = "ubuntu"
+  clone      = "ubuntu-server-noble"
+  agent      = 1
+  memory     = var.memory
+  cores      = var.cores
+  scsihw     = "virtio-scsi-pci"
+  os_type    = "ubuntu"
 
   # Cloud-Init disk
   disk {
     storage = "local"
-    type = "cdrom"
-    iso = "${proxmox_cloud_init_disk.ansible_cloud_init.id}"
-    format = "qcow2"
-    slot = "ide0"
+    type    = "cdrom"
+    iso     = proxmox_cloud_init_disk.ansible_cloud_init.id
+    format  = "qcow2"
+    slot    = "ide0"
   }
 
   # Speicher VM
   disk {
     storage = "local"
-    type = "disk"
-    size = "20G"
-    slot = "virtio0"
+    type    = "disk"
+    size    = "20G"
+    slot    = "virtio0"
   }
 
   # WAN
   network {
-    model = "virtio"
+    model  = "virtio"
     bridge = "vmbr0"
   }
 
   # LAN
   network {
-    model = "virtio"
+    model  = "virtio"
     bridge = "vmbr1"
   }
 
   connection {
-    host = var.ip
-    user = "ansible"
+    host        = var.ip
+    user        = "ansible"
     private_key = file("~/.ssh/id_rsa")
   }
 
   # Ansible Inventory
   provisioner "file" {
-    source = "${path.root}/ansible/"
+    source      = "${path.root}/ansible/"
     destination = "/root/ansible/"
   }
 
   provisioner "file" {
     content = templatefile("${path.module}/files/proxmox_inventory.tftpl", {
-      proxmox_url = var.proxmox_url
-      proxmox_user = proxmox_virtual_environment_user.ansible_user.user_id
-      proxmox_token_id = proxmox_virtual_environment_user_token.ansible_api.token_name
+      proxmox_url          = var.proxmox_url
+      proxmox_user         = proxmox_virtual_environment_user.ansible_user.user_id
+      proxmox_token_id     = proxmox_virtual_environment_user_token.ansible_api.token_name
       proxmox_token_secret = proxmox_virtual_environment_user_token.ansible_api.value
-      ip_regex = var.ip_regex
-    }) 
+      ip_regex             = var.ip_regex
+    })
     destination = "~/ansible/inventory_proxmox.yml"
   }
 
@@ -138,30 +153,30 @@ resource "proxmox_vm_qemu" "ansible" {
 
 # Erzeugen eines SSH-Keys für Ansible
 resource "tls_private_key" "ansible" {
-    algorithm = "RSA"
-    rsa_bits = 4096
+  algorithm = "RSA"
+  rsa_bits  = 4096
 }
 
 resource "proxmox_virtual_environment_user" "ansible_user" {
-    provider = bpg-proxmox
+  provider = bpg-proxmox
 
-    user_id = "ansible@pve"
-    comment = "User for Ansible dynamic inventory"
+  user_id = "ansible@pve"
+  comment = "User for Ansible dynamic inventory"
 }
 
 resource "proxmox_virtual_environment_user_token" "ansible_api" {
-    provider = bpg-proxmox
+  provider = bpg-proxmox
 
-    token_name = "ansible"
-    user_id = proxmox_virtual_environment_user.ansible_user.id
-    privileges_separation = true
+  token_name            = "ansible"
+  user_id               = proxmox_virtual_environment_user.ansible_user.id
+  privileges_separation = true
 }
 
 resource "proxmox_virtual_environment_acl" "ansible_api_acl" {
-    provider = bpg-proxmox
+  provider = bpg-proxmox
 
-    path = "/"
-    role_id = "Administrator"
-    propagate = true
-    token_id = proxmox_virtual_environment_user_token.ansible_api.id
+  path      = "/"
+  role_id   = "Administrator"
+  propagate = true
+  token_id  = proxmox_virtual_environment_user_token.ansible_api.id
 }
