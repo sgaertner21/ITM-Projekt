@@ -1,22 +1,25 @@
 terraform {
-  required_providers {
-    proxmox = {
-      source  = "telmate/proxmox"
-      version = "3.0.1-rc4"
-    }
-    tls = {
-      source  = "hashicorp/tls"
-      version = "4.0.6"
-    }
-    bpg-proxmox = {
-      source  = "bpg/proxmox"
-      version = "0.69.0"
-    }
-  }
+        required_providers {
+                proxmox = {
+                        source = "telmate/proxmox"
+                        version = "3.0.1-rc4"
+                }
+                tls = {
+                        source = "hashicorp/tls"
+                        version = "4.0.6"
+                }
+                bpg-proxmox = {
+                        source = "bpg/proxmox"
+                        version = "0.69.0"
+                }
+                macaddress = {
+                source = "ivoronin/macaddress"
+                version = "0.3.2"
+                }
+        }
 }
 
-locals {
-  ssh_keys = join(",", var.ssh_keys)
+resource "macaddress" "wan_address" {
 }
 
 resource "proxmox_cloud_init_disk" "ansible_cloud_init" {
@@ -24,57 +27,54 @@ resource "proxmox_cloud_init_disk" "ansible_cloud_init" {
   pve_node = var.proxmox_node
   storage  = "local"
 
-  meta_data = jsonencode({
+  meta_data = yamlencode({
     instance-id = sha1(var.vm_name)
   })
 
-  # network_config = yamlencode({
-  #   version = 1
-  #   config = [{
-  #     type = "physical"
-  #     name = "net0"
-  #     subnets = [{
-  #       type = "static"
-  #       address = "${var.ip}"
-  #       gateway = "${var.gateway}"
-  #       dns_nameservers = [
-  #         "${var.nameserver}"
-  #       ]
-  #     }]
-  #     }]
-  # })
-
-  network_config = <<-EOT
-  #cloud-config
-  network:
-    version: 2
-    ethernets:
-      enp0s18:
-        dhcp4: false
-        addresses:
-          - ${var.ip}
-        gateway4: ${var.gateway}
-        nameservers:
-          addresses:
-            - ${var.nameserver}
-  EOT
+  network_config = yamlencode({
+    version = 1
+    config = [{
+      type = "physical"
+      name = "eth0"
+      mac_address: "${macaddress.wan_address.address}"
+      subnets = [{
+        type = "static"
+        address = "${var.ip}/${var.subnet_cidr}"
+        gateway = "${var.gateway}"
+      }]
+      
+    },
+    {
+      type = "nameserver"
+      address = [
+        "${var.nameserver}"
+      ]
+    }]
+  })
 
   user_data = <<-EOT
   #cloud-config
-  users: 
-    - name: ansible
-      ssh-authorized-keys: [${local.ssh_keys}]
-      sudo: ['ALL=(ALL) NOPASSWD:ALL']
-      groups: sudo
-      shell: /bin/bash
+  hostname: ${var.vm_name}
+  manage_etc_hosts: false
+  fqdn: ${var.vm_name}
+  user: ansible
+  ssh_authorized_keys: [${join(",", var.ssh_keys)}]
+  users:
+    - default
+  chpasswd:
+    expire: false
   runcmd:
     - sudo apt update
-    - sudo apt install software-properties-common
+    - sudo apt install software-properties-common -y
     - sudo add-apt-repository --yes --update ppa:ansible/ansible
     - sudo apt install ansible -y
+  apt:
+
   ssh_keys:
-    rsa_private: ${tls_private_key.ansible.private_key_pem}
-    rsa_public: ${tls_private_key.ansible.public_key_openssh}
+    rsa_private: |
+      ${indent(4, tls_private_key.ansible.private_key_pem)}
+    rsa_public: |
+      ${indent(4, tls_private_key.ansible.public_key_openssh)}
   EOT
 }
 
@@ -113,6 +113,7 @@ resource "proxmox_vm_qemu" "ansible" {
   network {
     model  = "virtio"
     bridge = "vmbr0"
+    macaddr = macaddress.wan_address.address
   }
 
   # LAN
@@ -127,21 +128,31 @@ resource "proxmox_vm_qemu" "ansible" {
     private_key = file("~/.ssh/id_rsa")
   }
 
+  provisioner "remote-exec" {
+    inline = [
+      "if [ ! -f /var/lib/cloud/instance/boot-finished ]; then echo 'Waiting for cloud-init...'; fi",
+      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done",
+      "echo 'cloud-init finished!'",
+      "mkdir ~/ansible",
+      "sleep 1"
+    ]
+  }
+
   # Ansible Inventory
   provisioner "file" {
-    source      = "${path.root}/ansible/"
-    destination = "/root/ansible/"
+    source = "${path.root}/ansible/"
+    destination = "ansible"
   }
 
   provisioner "file" {
     content = templatefile("${path.module}/files/proxmox_inventory.tftpl", {
-      proxmox_url          = var.proxmox_url
-      proxmox_user         = proxmox_virtual_environment_user.ansible_user.user_id
-      proxmox_token_id     = proxmox_virtual_environment_user_token.ansible_api.token_name
-      proxmox_token_secret = proxmox_virtual_environment_user_token.ansible_api.value
-      ip_regex             = var.ip_regex
-    })
-    destination = "~/ansible/inventory_proxmox.yml"
+      proxmox_url = var.proxmox_url
+      proxmox_user = proxmox_virtual_environment_user.ansible_user.user_id
+      proxmox_token_id = proxmox_virtual_environment_user_token.ansible_api.token_name
+      proxmox_token_secret = regex(".*@.*!.*=(.*)", proxmox_virtual_environment_user_token.ansible_api.value)[0]
+      ip_regex = var.ip_regex
+    }) 
+    destination = "ansible/inventory_proxmox.yml"
   }
 
   provisioner "remote-exec" {

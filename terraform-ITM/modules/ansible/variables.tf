@@ -37,6 +37,16 @@ variable "ip" {
   type        = string
 }
 
+variable "subnet_cidr" {
+  description = "Subnetz der VM im CIDR-Format"
+  type        = number
+  default     = 24
+  validation {
+    condition = var.subnet_cidr >= 1 && var.subnet_cidr <= 30
+    error_message = "Subnetz muss zwischen /1 und /30 liegen"
+  }
+}
+
 variable "gateway" {
   description = "Gateway der VM"
   type        = string
