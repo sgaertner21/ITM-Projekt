@@ -31,9 +31,15 @@ variable "ansible_vm_ip" {
         type = string  
 }
 
+variable "ansible_vm_subnet_cidr" {
+        description = "Subnetzmaske der VM im CIDR-Format"
+        type = number
+        default = 24
+}
+
 variable "ansible_vm_gateway" {
-  description = "Gateway der VM"
-  type        = string
+        description = "Gateway der VM"
+        type        = string
 }
 
 variable "ansible_ip_address_filter_for_connection" {

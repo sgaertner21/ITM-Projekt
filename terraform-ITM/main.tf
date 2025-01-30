@@ -35,6 +35,7 @@ module "ansible" {
         memory          = var.ansible_vm_memory
         network_bridge  = "vmbr0"
         ip              = var.ansible_vm_ip
+        subnet_cidr     = var.ansible_vm_subnet_cidr
         gateway         = var.ansible_vm_gateway
         ssh_keys        = concat([file("~/.ssh/id_rsa.pub")], var.ssh_keys)
         ip_regex        = var.ansible_ip_address_filter_for_connection
