@@ -65,7 +65,7 @@ variable "vm_dns_server" {
 }
 
 variable "ssh_keys" {
-    description = "SSH-Keys für den User ansible"
+    description = "SSH-Keys für den User root"
     type        = list(string)
 }
 

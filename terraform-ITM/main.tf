@@ -63,6 +63,8 @@ module "OPNsense" {
 }
 
 module "bind9" {
+        depends_on = [module.OPNsense]
+
         source          = "./modules/bind9"
         vm_name         = var.bind9_vm_name
         vm_id           = var.bind9_vm_id
@@ -73,6 +75,4 @@ module "bind9" {
         ssh_keys        = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
         ip              = var.bind9_vm_ip
         gateway         = var.bind9_vm_gateway
-
-        depends_on = [module.OPNsense]
 }

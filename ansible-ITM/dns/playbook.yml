@@ -1,6 +1,6 @@
 - name: Set up BIND-DNS server
   become: true
-  hosts: bind9-test
+  hosts: "{{ var_hosts_dns }}"
   tags:
     - dns
   roles:
@@ -61,6 +61,6 @@
           ddnsdomain: itm.internal
           ddnsdomainprimary: "{{ hostvars['bind9-test'].ansible_host }}"
           ddnsdomainkeyname: opnsense
-          ddnsdomainkey: yawQV7dZ1nnHSUuMWcucv1E/dIaQVegJzb228RpJdQe/WYQaiz0+aEbFOTE3OqV2qGxNZxoRZ0PsJ7VjQZjbnQ==
+          ddnsdomainkey: "yawQV7dZ1nnHSUuMWcucv1E/dIaQVegJzb228RpJdQe/WYQaiz0+aEbFOTE3OqV2qGxNZxoRZ0PsJ7VjQZjbnQ=="
           ddnsdomainalgorithm: hmac-sha512
           ddnsupdate: "1"

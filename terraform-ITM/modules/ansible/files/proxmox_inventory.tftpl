@@ -14,7 +14,7 @@ compose:
         proxmox_agent_interfaces
         | selectattr('ip-addresses', 'defined')
         | map(attribute='ip-addresses')
-        | map('select', 'match', '{{ ip_regex }}')
+        | map('select', 'match', '${ip_regex}')
         | flatten
         | map('regex_replace', '/.*$', '')
         | first
