@@ -63,9 +63,3 @@ variable "proxmox_lan_ip" {
 variable "opnsense_vm_dns_server" {
     type    = string
 }
-
-variable "opnsense_additional_ssh_keys" {
-    description = "Zusätzliche SSH-Keys"
-    type        = list(string)
-    default     = []
-}

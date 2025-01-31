@@ -34,7 +34,7 @@ runcmd:
   - |
     sed -i '' -E -e '
     /<user>/,/<\/user>/ {
-      /<expires\/>/a\
+      /<\/password>/a\
           <authorizedkeys>${ssh_keys_base64}<\/authorizedkeys>
     }' /conf/config.xml
   - lan_net=$(echo "${vm_lan_ip}" | sed 's/\.[0-9]*$//')

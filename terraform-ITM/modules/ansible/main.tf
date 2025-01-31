@@ -13,8 +13,8 @@ terraform {
                         version = "0.69.0"
                 }
                 macaddress = {
-                source = "ivoronin/macaddress"
-                version = "0.3.2"
+                        source = "ivoronin/macaddress"
+                        version = "0.3.2"
                 }
         }
 }
@@ -133,8 +133,7 @@ resource "proxmox_vm_qemu" "ansible" {
       "if [ ! -f /var/lib/cloud/instance/boot-finished ]; then echo 'Waiting for cloud-init...'; fi",
       "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done",
       "echo 'cloud-init finished!'",
-      "mkdir ~/ansible",
-      "sleep 1"
+      "mkdir ~/ansible"
     ]
   }
 
