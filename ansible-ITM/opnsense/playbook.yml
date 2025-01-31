@@ -3,7 +3,7 @@
 
 - name: Create OPNsense Ansible User and API key
 
-  hosts: opnsense-test
+  hosts: "{{ var_hosts_opnsense }}"
   remote_user: root
 
   tasks:
@@ -46,7 +46,7 @@
       vars:
         xml_entries:
           key: "{{ var_ansible_opnsense_api_key }}"
-          secret: "{{ var_ansible_opnsense_api_secret}}"
+          secret: "{{ var_ansible_opnsense_api_secret_hash}}"
 
     - name: Reload configuration
       changed_when: false

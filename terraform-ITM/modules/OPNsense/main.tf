@@ -87,4 +87,49 @@ resource "proxmox_vm_qemu" "OPNsense_vm" {
                 model = "e1000"
                 bridge = proxmox_virtual_environment_network_linux_bridge.OPNsense_bridge.name
         }
+
+        connection {
+                host = var.vm_wan_ip
+                user = "root"
+                private_key = file("~/.ssh/id_rsa")
+        }
+
+        provisioner "remote-exec" {
+                inline = [
+                        "if [ ! -f /var/lib/cloud/instance/boot-finished ]; then echo 'Waiting for cloud-init...'; fi",
+                        "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done",
+                        "echo 'cloud-init finished!'"
+                ]
+        }
 }
+
+resource "terraform_data" "run_ansible" {
+        depends_on = [ proxmox_vm_qemu.OPNsense_vm ]
+
+        connection {
+                host        =   var.ansible_ip
+                user        =   "ansible"
+                private_key =   file("~/.ssh/id_rsa")
+        }
+
+        provisioner "remote-exec" {
+                inline = [
+                        "cd ~/ansible",
+                        "ansible-playbook -i inventory_proxmox.yml --extra-vars \"var_hosts_opnsense=${var.vm_name} var_ansible_public_ssh_key=${var.ansible_shh_key} var_ansible_opnsense_api_key=${random_id.opnsense_api_key.b64_std} var_ansible_opnsense_api_secret_hash=${local.opnsense_api_secret_hash}\" opnsense/playbook.yml"
+                ]          
+        }
+}
+
+resource "random_id" "opnsense_api_key" {
+  byte_length = 60
+}
+
+resource "random_bytes" "opnsense_api_secret" {
+  length = 60
+}
+
+locals {
+  opnsense_api_secret_hash = "$6$$$$${sha512(random_bytes.opnsense_api_secret.base64)}"
+}
+
+

@@ -68,3 +68,13 @@ variable "ssh_keys" {
     description = "SSH-Keys für den User ansible"
     type        = list(string)
 }
+
+variable "ansible_ip" {
+    description = "IP-Adresse des Ansible-Servers"
+    type        = string
+}
+
+variable "ansible_shh_key" {
+    description = "SSH-Key für ansible"
+    type        = string
+}

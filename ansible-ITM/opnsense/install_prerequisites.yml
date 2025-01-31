@@ -1,6 +1,6 @@
 - name: Install required packages for xml module
 
-  hosts: opnsense-test
+  hosts: "{{ var_hosts_opnsense }}"
   remote_user: root
   tasks:
     - name: Install required packages for lxml

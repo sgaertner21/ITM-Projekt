@@ -182,6 +182,15 @@ resource "proxmox_virtual_environment_user_token" "ansible_api" {
   privileges_separation = true
 }
 
+resource "proxmox_virtual_environment_acl" "ansible_user_acl" {
+  provider = bpg-proxmox
+
+  path      = "/"
+  role_id   = "Administrator"
+  propagate = true
+  user_id  = proxmox_virtual_environment_user.ansible_user.user_id
+}
+
 resource "proxmox_virtual_environment_acl" "ansible_api_acl" {
   provider = bpg-proxmox
 
