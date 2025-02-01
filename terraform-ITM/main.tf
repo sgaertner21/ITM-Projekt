@@ -74,6 +74,8 @@ module "bind9" {
         ssh_keys        = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
         ip              = var.bind9_vm_ip
         gateway         = var.bind9_vm_gateway
+        ansible_ip      = var.ansible_vm_ip
+        ansible_ssh_key = module.ansible.public_ssh_key
 }
 
 module "nginx-webserver" {

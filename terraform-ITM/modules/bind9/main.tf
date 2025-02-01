@@ -46,3 +46,23 @@ resource "proxmox_vm_qemu" "bind9" {
     bridge = var.network_bridge
   }
 }
+
+resource "terraform_data" "run_ansible" {
+  depends_on = [proxmox_vm_qemu.bind9]
+
+  connection {
+    host        = var.ansible_ip
+    user        = "ansible"
+    private_key = file("~/.ssh/id_rsa")
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "cd ~/ansible",
+      "command=\"ansible-inventory -i inventory_proxmox.yml --host ${var.vm_name} --yaml | grep ansible_host\"",
+      "while ! eval $command; do echo \"Waiting for ansible inventory to build up...\"; sleep 5; done",
+      "echo \"Host ${var.vm_name} found in ansible inventory!\"",
+      "ansible-playbook -i inventory_proxmox.yml --extra-vars \"var_hosts_dns=${var.vm_name} \" --ssh-extra-args=\"-o StrictHostKeyChecking=no\" dns/playbook.yml"
+    ]
+  }
+}
