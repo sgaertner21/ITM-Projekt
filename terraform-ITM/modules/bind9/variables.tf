@@ -56,3 +56,8 @@ variable "ansible_ssh_key" {
     description = "SSH-Key für ansible"
     type        = string
 }
+
+variable "opnsense_ip" {
+    description = "LAN IP-Adresse des OPNsense-Servers"
+    type        = string
+}
