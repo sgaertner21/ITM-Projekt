@@ -119,7 +119,7 @@ resource "terraform_data" "run_ansible" {
                         "command=\"ansible-inventory -i inventory_proxmox.yml --host ${var.vm_name} --yaml | grep ansible_host\"",
                         "while ! eval $command; do echo \"Waiting for ansible inventory to build up...\"; sleep 5; done",
                         "echo \"Host ${var.vm_name} found in ansible inventory!\"",
-                        "ansible-playbook -i inventory_proxmox.yml --extra-vars \"var_hosts_opnsense=${var.vm_name} var_ansible_public_ssh_key=${chomp(var.ansible_ssh_key)} var_ansible_opnsense_api_key=${random_id.opnsense_api_key.b64_std} var_ansible_opnsense_api_secret_hash=${local.opnsense_api_secret_hash}\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\" opnsense/playbook.yml"
+                        "ansible-playbook -i inventory_proxmox.yml --extra-vars \"var_hosts_opnsense=${var.vm_name} var_ansible_public_ssh_key=${chomp(var.ansible_ssh_key)} var_ansible_opnsense_api_key=${random_id.opnsense_api_key.b64_std} var_ansible_opnsense_api_secret_hash=${nonsensitive(local.opnsense_api_secret_hash)}\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\" opnsense/playbook.yml"
                 ]          
         }
 }
