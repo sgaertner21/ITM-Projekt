@@ -14,22 +14,20 @@
           - name: itm.internal
             create_reverse_zones: true
             primaries:
-              - "{{ hostvars['bind9-test'].ansible_host }}"
+              - "{{ hostvars[var_primary_dns_host].ansible_host }}"
             name_servers:
               - ns.itm.internal.
             hosts:
               - name: ns
-                ip: "{{ hostvars['bind9-test'].ansible_host }}"
+                ip: "{{ hostvars[var_primary_dns_host].ansible_host }}"
                 aliases:
                   - ns1
             networks:
-              - '172.18.0'
+              - "{{ var_zone_network_address }}"
             allow_update:
-              - 172.18.0.1
+              - "{{ var_opnsense_ip }}"
         bind_recursion: true
-        bind_forwarders:
-          - 9.9.9.9
-          - 1.1.1.1
+        bind_forwarders: {{ var_forwarders }}
         bind_dnssec_enable: false
         bind_dns_keys:
           - name: opnsense

@@ -55,7 +55,7 @@ module "OPNsense" {
         vm_network_interface_lan = var.opnsense_vm_network_interface_lan
         vm_lan_ip       = var.opnsense_vm_lan_ip
         vm_wan_ip       = var.opnsense_vm_wan_ip
-        wan_gateway  = var.opnsense_vm_wan_gateway
+        wan_gateway     = var.opnsense_vm_wan_gateway
         proxmox_lan_ip  = var.proxmox_lan_ip
         vm_dns_server   = var.opnsense_vm_dns_server
         ssh_keys        = concat([module.ansible.public_ssh_key], [file("~/.ssh/id_rsa.pub")]) #, var.additional_ssh_keys
