@@ -1,0 +1,39 @@
+- name: Nginx Webserver
+  hosts: webservers
+  become: true
+  tasks:
+    # Nginx installieren
+    - name: Stelle sicher, dass Nginx installiert ist
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    # Nginx starten und aktivieren
+    - name: Stelle sicher, dass Nginx läuft
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+    # Benutzerdefinierte index.html bereitstellen
+    - name: Benutzerdefinierte index.html bereitstellen
+      copy:
+        src: ./index.html
+        dest: /var/www/html/index.html
+        mode: '0644'
+
+    # Standard-Nginx-Konfiguration anpassen (optional)
+    - name: Standard-Nginx-Konfiguration anpassen
+      lineinfile:
+        path: /etc/nginx/sites-available/default
+        regexp: '^\s*index .*;$'
+        line: '        index index.html;'
+      notify:
+        - Reload Nginx
+
+  handlers:
+    - name: Reload Nginx
+      service:
+        name: nginx
+        state: reloaded

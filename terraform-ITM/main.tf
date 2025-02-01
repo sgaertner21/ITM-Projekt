@@ -76,3 +76,18 @@ module "bind9" {
         ip              = var.bind9_vm_ip
         gateway         = var.bind9_vm_gateway
 }
+
+module "nginx-webserver" {
+        depends_on = [module.OPNsense]
+
+        source          = "./modules/nginx-webserver"
+        vm_name         = var.nginx-webserver_vm_name
+        vm_id           = var.nginx-webserver_vm_id
+        proxmox_node    = var.nginx-webserver_proxmox_node
+        cores           = var.nginx-webserver_vm_cores
+        memory          = var.nginx-webserver_vm_memory
+        network_bridge  = "vmbr1"
+        ssh_keys        = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
+        ip              = var.nginx-webserver_vm_ip
+        gateway         = var.nginx-webserver_vm_gateway
+}

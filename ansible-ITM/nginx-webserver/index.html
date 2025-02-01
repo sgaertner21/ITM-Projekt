@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT News - Bleiben Sie informiert</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        header {
+            background-color: #1a1a1a;
+            color: white;
+            padding: 20px 10%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        nav ul li {
+            margin-left: 20px;
+        }
+        nav ul li a {
+            text-decoration: none;
+            color: white;
+            font-size: 16px;
+        }
+        .hero {
+            background-image: url('https://via.placeholder.com/1920x500');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            padding: 100px 10%;
+        }
+        .hero h2 {
+            font-size: 36px;
+        }
+        .hero p {
+            font-size: 18px;
+        }
+        .content {
+            padding: 40px 10%;
+        }
+        .content h3 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        .articles {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .article {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .article .color-block {
+            height: 200px; /* Höhe des Farbfeldes */
+        }
+        .color-block.ai { background-color: #4caf50; } /* Grün für KI */
+        .color-block.technology { background-color: #2196f3; } /* Blau für Technologie */
+        .color-block.security { background-color: #ff5722; } /* Orange für Cybersicherheit */
+        .color-block.gadgets { background-color: #9c27b0; } /* Violett für Gadgets */
+        
+        .article h4 {
+            font-size: 20px;
+            margin: 15px;
+        }
+        .article p {
+            font-size: 14px;
+            margin: 15px;
+        }
+        footer {
+            background-color: #1a1a1a;
+            color: white;
+            text-align: center;
+            padding: 20px 10%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>IT News</h1>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Technologie</a></li>
+                <li><a href="#">Gadgets</a></li>
+                <li><a href="#">Software</a></li>
+                <li><a href="#">Über uns</a></li>
+                <li><a href="#">Kontakt</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h2>Bleiben Sie auf dem Laufenden mit den neuesten IT-News</h2>
+        <p>Erfahren Sie alles über die neuesten Technologien, Trends und Innovationen.</p>
+    </section>
+
+    <section class="content">
+        <h3>Top Artikel</h3>
+        <div class="articles">
+            
+            <!-- Artikel mit grünem Feld -->
+            <div class="article">
+                <div class="color-block ai"></div>
+                <h4>Die Zukunft der KI</h4>
+                <p>Wie künstliche Intelligenz unsere Welt verändert.</p>
+            </div>
+
+             <!-- Artikel mit blauem Feld -->
+             <div class="article">
+                <div class="color-block technology"></div>
+                <h4>5G-Technologie erklärt</h4>
+                <p>Was bedeutet der neue Mobilfunkstandard für uns?</p>
+             </div>
+
+             <!-- Artikel mit orangem Feld -->
+             <div class="article">
+                <div class="color-block security"></div>
+                <h4>Cybersicherheit im Fokus</h4>
+                <p>Tipps zum Schutz Ihrer Daten in der digitalen Welt.</p>
+             </div>
+
+             <!-- Artikel mit violettem Feld -->
+             <div class="article">
+                <div class="color-block gadgets"></div>
+                <h4>Die besten Gadgets des Jahres</h4>
+                <p>Unsere Top-Auswahl an innovativen Geräten.</p>
+             </div>
+
+         </div>
+     </section>
+
+     <footer>
+         &copy; 2025 IT News. Alle Rechte vorbehalten.
+     </footer>
+</body>
+</html>
