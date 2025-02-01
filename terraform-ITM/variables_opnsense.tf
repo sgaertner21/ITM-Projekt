@@ -56,6 +56,10 @@ variable "opnsense_vm_wan_ip" {
     type    = string
 }
 
+variable "opnsense_vm_wan_gateway" {
+    type    = string
+}
+
 variable "proxmox_lan_ip" {
     type    = string
 }

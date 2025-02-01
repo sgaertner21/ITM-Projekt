@@ -48,6 +48,10 @@ variable "vm_network_interface_lan" {
     default = "em1"
 }
 
+variable "wan_gateway" {
+    type    = string
+}
+
 variable "vm_lan_ip" {
     type    = string  
 }

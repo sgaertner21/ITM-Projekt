@@ -35,6 +35,7 @@ resource "proxmox_cloud_init_disk" "OPNsense_cloud_init" {
                 vm_network_interface_wan = var.vm_network_interface_wan
                 vm_lan_ip = var.vm_lan_ip
                 vm_wan_ip = var.vm_wan_ip
+                wan_gateway = var.wan_gateway
                 vm_dns_server = var.vm_dns_server
                 vm_wan_subnet_cidr = "24"
                 ssh_keys_base64 = base64encode(join("\r\n", var.ssh_keys))
