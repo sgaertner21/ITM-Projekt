@@ -27,7 +27,7 @@
             allow_update:
               - "{{ var_opnsense_ip }}"
         bind_recursion: true
-        bind_forwarders: {{ var_forwarders }}
+        bind_forwarders: var_forwarders
         bind_dnssec_enable: false
         bind_dns_keys:
           - name: opnsense
@@ -40,7 +40,7 @@
   ansible.builtin.import_playbook: ../opnsense/install_prerequisites.yml
 
 - name: Configure OPNsense for dynamic DNS updates
-  hosts: opnsense-test
+  hosts: "{{ var_hosts_opnsense }}"
   tags:
     - opnsense
   remote_user: root
@@ -57,7 +57,7 @@
         xml_entries:
           enable: "1"
           ddnsdomain: itm.internal
-          ddnsdomainprimary: "{{ hostvars['bind9-test'].ansible_host }}"
+          ddnsdomainprimary: "{{ hostvars[var_primary_dns_host].ansible_host }}"
           ddnsdomainkeyname: opnsense
           ddnsdomainkey: "yawQV7dZ1nnHSUuMWcucv1E/dIaQVegJzb228RpJdQe/WYQaiz0+aEbFOTE3OqV2qGxNZxoRZ0PsJ7VjQZjbnQ=="
           ddnsdomainalgorithm: hmac-sha512

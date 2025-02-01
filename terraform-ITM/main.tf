@@ -78,6 +78,7 @@ module "bind9" {
         ansible_ip      = var.ansible_vm_ip
         ansible_ssh_key = module.ansible.public_ssh_key
         opnsense_ip     = var.opnsense_vm_lan_ip
+        opnsense_vm_name = var.opnsense_vm_name
 }
 
 module "nginx-webserver" {

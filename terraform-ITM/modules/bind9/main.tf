@@ -47,6 +47,17 @@ resource "proxmox_vm_qemu" "bind9" {
   }
 }
 
+locals {
+  ansible_variables = [
+    "var_hosts_dns=${var.vm_name}",
+    "var_primary_dns_host=${var.vm_name}",
+    "var_zone_network_address=172.18.0",
+    "var_forwarders=[\\\"9.9.9.9\\\",\\\"1.1.1.1\\\"]",
+    "var_opnsense_ip=${var.opnsense_ip}",
+    "var_hosts_opnsense=${var.opnsense_vm_name}",
+  ]
+}
+
 resource "terraform_data" "run_ansible" {
   depends_on = [proxmox_vm_qemu.bind9]
 
@@ -62,7 +73,7 @@ resource "terraform_data" "run_ansible" {
       "command=\"ansible-inventory -i inventory_proxmox.yml --host ${var.vm_name} --yaml | grep ansible_host\"",
       "while ! eval $command; do echo \"Waiting for ansible inventory to build up...\"; sleep 5; done",
       "echo \"Host ${var.vm_name} found in ansible inventory!\"",
-      "ansible-playbook -i inventory_proxmox.yml --extra-vars \"var_hosts_dns=${var.vm_name} var_primary_dns_host=${var.ip} var_zone_network_address=\\\"172.18.0\\\" var_forwarders='[\\\"9.9.9.9\\\",\\\"1.1.1.1\\\"]' var_opnsense_ip=${var.opnsense_ip} \" --ssh-extra-args=\"-o StrictHostKeyChecking=no\" dns/playbook.yml"
+      "ansible-playbook -i inventory_proxmox.yml --extra-vars \"${join(" ", local.ansible_variables)}\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\" dns/playbook.yml"
     ]
   }
 }

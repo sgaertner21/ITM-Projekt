@@ -61,3 +61,8 @@ variable "opnsense_ip" {
     description = "LAN IP-Adresse des OPNsense-Servers"
     type        = string
 }
+
+variable "opnsense_vm_name" {
+    description = "Hostname der OPNsense-VM"
+    type        = string
+}
