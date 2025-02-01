@@ -52,10 +52,31 @@ variable "gateway" {
   type        = string
 }
 
-variable "network_bridge" {
-  description = "Netzwerkbrücke für die VM"
+variable "network_config_typ_lan" {
+  description = "Typ der Netzwerkkonfiguration für LAN"
   type        = string
-  default     = "vmbr0"
+  default     = "dhcp"
+}
+
+variable "ip_lan" {
+  description = "IP-Adresse der VM im LAN"
+  type        = string
+  nullable    = true
+  default     = null
+}
+
+variable "subnet_cidr_lan" {
+  description = "Subnetzmaske LAN der VM im CIDR-Format"
+  type = number
+  nullable = true
+  default = 24
+}
+
+variable "gateway_lan" {
+  description = "Gateway-IP-Adresse im LAN der VM"
+  type        = string
+  nullable    = true
+  default     = null
 }
 
 variable "ssh_keys" {

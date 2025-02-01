@@ -4,13 +4,16 @@ variable "nginx-webserver_vm_name" {
 }
 
 variable "nginx-webserver_vm_ip" {
-        description = "IP-Adresse der VM"
-        type = string
+        description = "DHCP oder IP-Adresse der VM"
+        type        = string
+        default     = "dhcp"
 }
 
 variable "nginx-webserver_vm_gateway" {
         description = "Gateway-IP-Adresse der VM"
-        type = string
+        type        = string
+        nullable    = true
+        default     = null
 }
 
 variable "nginx-webserver_vm_cores" {

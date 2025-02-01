@@ -1,5 +1,5 @@
 - name: Nginx Webserver
-  hosts: webservers
+  hosts: "{{ var_hosts_webserver }}"
   become: true
   tasks:
     # Nginx installieren

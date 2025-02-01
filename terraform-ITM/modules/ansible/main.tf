@@ -22,6 +22,9 @@ terraform {
 resource "macaddress" "wan_address" {
 }
 
+resource "macaddress" "lan_address" {
+}
+
 resource "proxmox_cloud_init_disk" "ansible_cloud_init" {
   name     = var.vm_name
   pve_node = var.proxmox_node
@@ -49,7 +52,22 @@ resource "proxmox_cloud_init_disk" "ansible_cloud_init" {
       address = [
         "${var.nameserver}"
       ]
-    }]
+    },
+    {
+      type = "physical"
+      name = "eth1"
+      mac_address: "${macaddress.lan_address.address}"
+      subnets = [
+        merge(
+          { type = var.network_config_typ_lan },
+          var.network_config_typ_lan == "static" ? {
+            address = "${var.ip_lan}/${var.subnet_cidr_lan}",
+            gateway = "${var.gateway_lan}"
+          } : {}
+        )
+      ]
+    }
+    ]
   })
 
   user_data = <<-EOT
@@ -126,6 +144,7 @@ resource "proxmox_vm_qemu" "ansible" {
   network {
     model  = "virtio"
     bridge = "vmbr1"
+    macaddr = macaddress.lan_address.address
   }
 
   connection {

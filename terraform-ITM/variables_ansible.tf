@@ -42,6 +42,33 @@ variable "ansible_vm_gateway" {
         type        = string
 }
 
+variable "ansible_vm_network_config_typ_lan" {
+        description = "Typ der Netzwerkkonfiguration für LAN"
+        type        = string
+        default     = "dhcp"
+}
+
+variable "ansible_vm_ip_lan" {
+        description = "IP-Adresse der VM im LAN"
+        type        = string
+        nullable    = true
+        default     = null
+}
+
+variable "ansible_vm_subnet_cidr_lan" {
+        description = "Subnetzmaske LAN der VM im CIDR-Format"
+        type = number
+        nullable = true
+        default = 24
+}
+
+variable "ansible_vm_gateway_lan" {
+        description = "Gateway-IP-Adresse im LAN der VM"
+        type        = string
+        nullable    = true
+        default     = null
+}
+
 variable "ansible_ip_address_filter_for_connection" {
         description = "Regex für IP-Adressen, die Ansible benutzen darf um sich zu verbinden"
         type = string

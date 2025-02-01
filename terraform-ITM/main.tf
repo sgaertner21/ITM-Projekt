@@ -33,10 +33,10 @@ module "ansible" {
         proxmox_node    = var.ansible_proxmox_node
         cores           = var.ansible_vm_cores
         memory          = var.ansible_vm_memory
-        network_bridge  = "vmbr0"
         ip              = var.ansible_vm_ip
         subnet_cidr     = var.ansible_vm_subnet_cidr
         gateway         = var.ansible_vm_gateway
+        network_config_typ_lan = var.ansible_vm_network_config_typ_lan
         ssh_keys        = concat([file("~/.ssh/id_rsa.pub")], var.additional_ssh_keys)
         ip_regex        = var.ansible_ip_address_filter_for_connection
         proxmox_url     = var.proxmox_url
@@ -71,7 +71,6 @@ module "bind9" {
         proxmox_node    = var.bind9_proxmox_node
         cores           = var.bind9_vm_cores
         memory          = var.bind9_vm_memory
-        network_bridge  = "vmbr1"
         ssh_keys        = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
         ip              = var.bind9_vm_ip
         gateway         = var.bind9_vm_gateway
@@ -86,8 +85,7 @@ module "nginx-webserver" {
         proxmox_node    = var.nginx-webserver_proxmox_node
         cores           = var.nginx-webserver_vm_cores
         memory          = var.nginx-webserver_vm_memory
-        network_bridge  = "vmbr1"
         ssh_keys        = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
-        ip              = var.nginx-webserver_vm_ip
-        gateway         = var.nginx-webserver_vm_gateway
+        ansible_ip      = var.ansible_vm_ip
+        ansible_ssh_key = module.ansible.public_ssh_key
 }

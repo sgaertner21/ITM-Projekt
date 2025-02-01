@@ -6,17 +6,20 @@ variable "vm_name" {
 variable "vm_id" {
   description = "ID der VM"
   type        = number
-  nullable = true
+  nullable    = true
 }
 
 variable "ip" {
-  description = "IP-Adresse der VM"
+  description = "DHCP oder IP-Adresse der VM"
   type        = string
+  default     = "dhcp"
 }
 
 variable "gateway" {
   description = "Gateway-IP-Adresse der VM"
   type        = string
+  nullable    = true
+  default     = null
 }
 
 variable "proxmox_node" {
@@ -45,4 +48,14 @@ variable "network_bridge" {
 variable "ssh_keys" {
   description = "SSH-Keys für den User ansible"
   type        = list(string)
+}
+
+variable "ansible_ip" {
+    description = "IP-Adresse des Ansible-Servers"
+    type        = string
+}
+
+variable "ansible_ssh_key" {
+    description = "SSH-Key für ansible"
+    type        = string
 }
