@@ -92,6 +92,7 @@ resource "proxmox_vm_qemu" "OPNsense_vm" {
                 host = var.vm_wan_ip
                 user = "root"
                 private_key = file("~/.ssh/id_rsa")
+                timeout = "10m"
         }
 
         provisioner "remote-exec" {
@@ -115,21 +116,24 @@ resource "terraform_data" "run_ansible" {
         provisioner "remote-exec" {
                 inline = [
                         "cd ~/ansible",
-                        "ansible-playbook -i inventory_proxmox.yml --extra-vars \"var_hosts_opnsense=${var.vm_name} var_ansible_public_ssh_key=${var.ansible_shh_key} var_ansible_opnsense_api_key=${random_id.opnsense_api_key.b64_std} var_ansible_opnsense_api_secret_hash=${local.opnsense_api_secret_hash}\" opnsense/playbook.yml"
+                        "command=\"ansible-inventory -i inventory_proxmox.yml --host ${var.vm_name} --yaml | grep ansible_host\"",
+                        "while ! eval $command; do echo \"Waiting for ansible inventory to build up...\"; sleep 5; done",
+                        "echo \"Host ${var.vm_name} found in ansible inventory!\"",
+                        "ansible-playbook -i inventory_proxmox.yml --extra-vars \"var_hosts_opnsense=${var.vm_name} var_ansible_public_ssh_key=${chomp(var.ansible_ssh_key)} var_ansible_opnsense_api_key=${random_id.opnsense_api_key.b64_std} var_ansible_opnsense_api_secret_hash=${local.opnsense_api_secret_hash}\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\" opnsense/playbook.yml"
                 ]          
         }
 }
 
 resource "random_id" "opnsense_api_key" {
-  byte_length = 60
+        byte_length = 60
 }
 
 resource "random_bytes" "opnsense_api_secret" {
-  length = 60
+        length = 60
 }
 
 locals {
-  opnsense_api_secret_hash = "$6$$$$${sha512(random_bytes.opnsense_api_secret.base64)}"
+        opnsense_api_secret_hash = format("%s%s", "$6$$", sha512(random_bytes.opnsense_api_secret.base64))
 }
 
 

@@ -68,8 +68,6 @@ resource "proxmox_cloud_init_disk" "ansible_cloud_init" {
     - sudo apt install software-properties-common -y
     - sudo add-apt-repository --yes --update ppa:ansible/ansible
     - sudo apt install ansible -y
-  apt:
-
   ssh_keys:
     rsa_private: |
       ${indent(4, tls_private_key.ansible.private_key_pem)}

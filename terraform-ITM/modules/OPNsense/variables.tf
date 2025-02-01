@@ -74,7 +74,7 @@ variable "ansible_ip" {
     type        = string
 }
 
-variable "ansible_shh_key" {
+variable "ansible_ssh_key" {
     description = "SSH-Key für ansible"
     type        = string
 }
