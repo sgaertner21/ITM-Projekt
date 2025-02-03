@@ -8,6 +8,10 @@ terraform {
                         source = "bpg/proxmox"
                         version = "0.69.0"
                 }
+                htpasswd = {
+                        source = "loafoe/htpasswd"
+                        version = "1.2.1"
+                }
         }
 }
 
@@ -105,6 +109,15 @@ resource "proxmox_vm_qemu" "OPNsense_vm" {
         }
 }
 
+locals {
+        ansible_variables = [
+                "var_hosts_opnsense=${var.vm_name}",
+                "var_ansible_public_ssh_key=${chomp(var.ansible_ssh_key)}",
+                "var_ansible_opnsense_api_key=${random_id.opnsense_api_key.b64_std}",
+                "var_ansible_opnsense_api_secret_hash=${replace(nonsensitive(htpasswd_password.opnsense_api_secret_hash.sha512), "$", "\\$")}"
+        ]
+}
+
 resource "terraform_data" "run_ansible" {
         depends_on = [ proxmox_vm_qemu.OPNsense_vm ]
 
@@ -120,21 +133,21 @@ resource "terraform_data" "run_ansible" {
                         "command=\"ansible-inventory -i inventory_proxmox.yml --host ${var.vm_name} --yaml | grep ansible_host\"",
                         "while ! eval $command; do echo \"Waiting for ansible inventory to build up...\"; sleep 5; done",
                         "echo \"Host ${var.vm_name} found in ansible inventory!\"",
-                        "ansible-playbook -i inventory_proxmox.yml --extra-vars \"var_hosts_opnsense=${var.vm_name} var_ansible_public_ssh_key=${chomp(var.ansible_ssh_key)} var_ansible_opnsense_api_key=${random_id.opnsense_api_key.b64_std} var_ansible_opnsense_api_secret_hash=${nonsensitive(local.opnsense_api_secret_hash)}\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\" opnsense/playbook.yml"
+                        "ansible-playbook -i inventory_proxmox.yml --extra-vars \"${join(" ", local.ansible_variables)}\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\" opnsense/playbook.yml"
                 ]          
         }
 }
 
 resource "random_id" "opnsense_api_key" {
-        byte_length = 60
+        byte_length     = 60
 }
 
-resource "random_bytes" "opnsense_api_secret" {
-        length = 60
-}
+ resource "random_bytes" "opnsense_api_secret" {
+        length          = 30
+ }
 
-locals {
-        opnsense_api_secret_hash = format("%s%s", "$6$$", sha512(random_bytes.opnsense_api_secret.base64))
+resource "htpasswd_password" "opnsense_api_secret_hash" {
+        password = random_bytes.opnsense_api_secret.base64
 }
 
 

@@ -93,4 +93,7 @@ module "nginx-webserver" {
         ssh_keys        = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
         ansible_ip      = var.ansible_vm_ip
         ansible_ssh_key = module.ansible.public_ssh_key
+        opnsense_vm_name = var.opnsense_vm_name
+        opnsense_api_key = module.OPNsense.opnsense_api_key
+        opnsense_api_secret = module.OPNsense.opnsense_api_secret
 }

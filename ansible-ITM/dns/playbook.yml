@@ -62,3 +62,26 @@
           ddnsdomainkey: "yawQV7dZ1nnHSUuMWcucv1E/dIaQVegJzb228RpJdQe/WYQaiz0+aEbFOTE3OqV2qGxNZxoRZ0PsJ7VjQZjbnQ=="
           ddnsdomainalgorithm: hmac-sha512
           ddnsupdate: "1"
+
+- name: Set OPNsense DNS Configuration
+  hosts: "{{ var_hosts_opnsense }}"
+  remote_user: root
+  tags:
+    - opnsense
+  tasks:
+    - name: Set Primary DNS Server
+      community.general.xml:
+        path: /conf/config.xml
+        xpath: /opnsense/system/dnsserver
+        value: "{{ hostvars[var_primary_dns_host].ansible_host }}"
+
+    - name: Set Domain
+      community.general.xml:
+        path: /conf/config.xml
+        xpath: /opnsense/system/domain
+        value: itm.internal
+
+    - name: Reload configuration
+      changed_when: false
+      ansible.builtin.command:
+        cmd: /usr/local/etc/rc.reload_all

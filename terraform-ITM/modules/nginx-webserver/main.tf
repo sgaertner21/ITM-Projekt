@@ -7,12 +7,6 @@ terraform {
   }
 }
 
-locals {
-  ansible_variables = [
-    "var_hosts_webserver=${var.vm_name}"
-  ]
-}
-
 resource "proxmox_vm_qemu" "nginx-webserver" {
   name        = var.vm_name
   vmid        = var.vm_id
@@ -51,6 +45,17 @@ resource "proxmox_vm_qemu" "nginx-webserver" {
     model  = "virtio"
     bridge = var.network_bridge
   }
+}
+
+locals {
+  ansible_variables = [
+    "var_hosts_webserver=${var.vm_name}",
+    "var_hosts_opnsense=${var.opnsense_vm_name}",
+    "var_opnsense_firewall=${var.opnsense_vm_name}",
+    "var_opnsense_api_key=${var.opnsense_api_key}",
+    "var_opnsense_api_secret=${nonsensitive(var.opnsense_api_secret)}",
+    "var_webserver=${var.vm_name}",
+  ]
 }
 
 resource "terraform_data" "run_ansible" {

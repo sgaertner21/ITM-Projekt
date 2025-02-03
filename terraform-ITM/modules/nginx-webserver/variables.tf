@@ -59,3 +59,18 @@ variable "ansible_ssh_key" {
     description = "SSH-Key für ansible"
     type        = string
 }
+
+variable "opnsense_vm_name" {
+    description = "Hostname der OPNsense-VM"
+    type        = string
+}
+
+variable "opnsense_api_key" {
+    description = "API-Key für OPNsense"
+    type        = string
+}
+
+variable "opnsense_api_secret" {
+    description = "API-Secret für OPNsense"
+    type        = string
+}

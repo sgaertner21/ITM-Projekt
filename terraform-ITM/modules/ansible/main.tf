@@ -197,6 +197,13 @@ resource "proxmox_virtual_environment_user" "ansible_user" {
 
   user_id = "ansible@pve"
   comment = "User for Ansible dynamic inventory"
+
+  acl {
+    path      = "/"
+    role_id   = "Administrator"
+    propagate = true
+  }
+
 }
 
 resource "proxmox_virtual_environment_user_token" "ansible_api" {
@@ -205,15 +212,6 @@ resource "proxmox_virtual_environment_user_token" "ansible_api" {
   token_name            = "ansible"
   user_id               = proxmox_virtual_environment_user.ansible_user.id
   privileges_separation = true
-}
-
-resource "proxmox_virtual_environment_acl" "ansible_user_acl" {
-  provider = bpg-proxmox
-
-  path      = "/"
-  role_id   = "Administrator"
-  propagate = true
-  user_id  = proxmox_virtual_environment_user.ansible_user.user_id
 }
 
 resource "proxmox_virtual_environment_acl" "ansible_api_acl" {
