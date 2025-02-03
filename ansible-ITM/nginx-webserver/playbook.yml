@@ -104,7 +104,7 @@
         pretty_print: true
         set_children:
           - any: "1"
-          - port: "8080"
+          - port: "{{ var_external_port }}"
 
     - name: Set OPNsense firewall rule
       ansibleguy.opnsense.rule:

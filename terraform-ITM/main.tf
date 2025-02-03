@@ -96,4 +96,5 @@ module "nginx-webserver" {
         opnsense_vm_name = var.opnsense_vm_name
         opnsense_api_key = module.OPNsense.opnsense_api_key
         opnsense_api_secret = module.OPNsense.opnsense_api_secret
+        external_port   = var.nginx-webserver_external_port
 }

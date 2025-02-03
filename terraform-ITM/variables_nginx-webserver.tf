@@ -38,3 +38,9 @@ variable "nginx-webserver_vm_id" {
         type = number
         nullable = true
 }
+
+variable "nginx-webserver_external_port" {
+        description = "Port, auf dem der Webserver von extern erreichbar ist"
+        type = number
+        default = 8080
+}

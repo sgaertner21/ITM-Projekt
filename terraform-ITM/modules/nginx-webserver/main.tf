@@ -55,6 +55,7 @@ locals {
     "var_opnsense_api_key=${var.opnsense_api_key}",
     "var_opnsense_api_secret=${nonsensitive(var.opnsense_api_secret)}",
     "var_webserver=${var.vm_name}",
+    "var_external_port=${var.external_port}",
   ]
 }
 

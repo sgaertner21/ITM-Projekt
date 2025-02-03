@@ -74,3 +74,8 @@ variable "opnsense_api_secret" {
     description = "API-Secret für OPNsense"
     type        = string
 }
+
+variable "external_port" {
+    description = "Port, auf dem der Webserver von extern erreichbar ist"
+    type        = number
+}
