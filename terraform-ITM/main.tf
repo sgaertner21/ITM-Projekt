@@ -98,3 +98,17 @@ module "nginx-webserver" {
         opnsense_api_secret = module.OPNsense.opnsense_api_secret
         external_port   = var.nginx-webserver_external_port
 }
+
+module "fileserver" {
+        depends_on = [module.bind9]
+
+        source          = "./modules/fileserver"
+        vm_name         = var.fileserver_vm_name
+        vm_id           = var.fileserver_vm_id
+        proxmox_node    = var.fileserver_proxmox_node
+        cores           = var.fileserver_vm_cores
+        memory          = var.fileserver_vm_memory
+        ssh_keys        = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
+        ansible_ip      = var.ansible_vm_ip
+        ansible_ssh_key = module.ansible.public_ssh_key
+}
