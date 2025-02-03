@@ -82,7 +82,7 @@ module "bind9" {
 }
 
 module "nginx-webserver" {
-        depends_on = [module.OPNsense]
+        depends_on = [module.bind9]
 
         source          = "./modules/nginx-webserver"
         vm_name         = var.nginx-webserver_vm_name
