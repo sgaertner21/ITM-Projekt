@@ -27,7 +27,7 @@
             allow_update:
               - "{{ var_opnsense_ip }}"
         bind_recursion: true
-        bind_forwarders: var_forwarders
+        bind_forwarders: "{{ var_forwarders }}"
         bind_dnssec_enable: false
         bind_dns_keys:
           - name: opnsense
