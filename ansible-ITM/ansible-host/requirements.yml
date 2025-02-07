@@ -1,5 +1,6 @@
 collections:
   - name: ansibleguy.opnsense
+  - name: vladgh.samba
 
 roles:
   - name: bertvv.bind

@@ -82,3 +82,8 @@ variable "ansible_ssh_key" {
     description = "SSH-Key für ansible"
     type        = string
 }
+
+variable "dhcp_dns_server" {
+    description = "DNS-Server für DHCP"
+    type        = string
+}

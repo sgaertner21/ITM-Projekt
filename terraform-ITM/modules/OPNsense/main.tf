@@ -114,7 +114,8 @@ locals {
                 "var_hosts_opnsense=${var.vm_name}",
                 "var_ansible_public_ssh_key=${chomp(var.ansible_ssh_key)}",
                 "var_ansible_opnsense_api_key=${random_id.opnsense_api_key.b64_std}",
-                "var_ansible_opnsense_api_secret_hash=${replace(nonsensitive(htpasswd_password.opnsense_api_secret_hash.sha512), "$", "\\$")}"
+                "var_ansible_opnsense_api_secret_hash=${replace(nonsensitive(htpasswd_password.opnsense_api_secret_hash.sha512), "$", "\\$")}",
+                "var_dhcp_dns_server=${var.dhcp_dns_server}"
         ]
 }
 

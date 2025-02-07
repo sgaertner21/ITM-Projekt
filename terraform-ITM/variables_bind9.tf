@@ -8,6 +8,12 @@ variable "bind9_vm_ip" {
         type = string
 }
 
+variable "bind9_vm_subnet_cidr" {
+        description = "Subnetzmaske der VM im CIDR Format"
+        type = number
+        default = 24
+}
+
 variable "bind9_vm_gateway" {
         description = "Gateway-IP-Adresse der VM"
         type = string

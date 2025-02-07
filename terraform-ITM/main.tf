@@ -61,6 +61,7 @@ module "OPNsense" {
         ssh_keys        = concat([module.ansible.public_ssh_key], [file("~/.ssh/id_rsa.pub")]) #, var.additional_ssh_keys
         ansible_ip      = var.ansible_vm_ip
         ansible_ssh_key = module.ansible.public_ssh_key
+        dhcp_dns_server = var.bind9_vm_ip
 }
 
 module "bind9" {
@@ -73,7 +74,7 @@ module "bind9" {
         cores           = var.bind9_vm_cores
         memory          = var.bind9_vm_memory
         ssh_keys        = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
-        ip              = var.bind9_vm_ip
+        ip              = "${var.bind9_vm_ip}/${var.bind9_vm_subnet_cidr}"
         gateway         = var.bind9_vm_gateway
         ansible_ip      = var.ansible_vm_ip
         ansible_ssh_key = module.ansible.public_ssh_key
@@ -82,7 +83,7 @@ module "bind9" {
 }
 
 module "nginx-webserver" {
-        depends_on = [module.bind9]
+        depends_on = [module.bind9, module.OPNsense]
 
         source          = "./modules/nginx-webserver"
         vm_name         = var.nginx-webserver_vm_name
@@ -100,7 +101,7 @@ module "nginx-webserver" {
 }
 
 module "fileserver" {
-        depends_on = [module.bind9]
+        depends_on = [module.bind9, module.OPNsense]
 
         source          = "./modules/fileserver"
         vm_name         = var.fileserver_vm_name

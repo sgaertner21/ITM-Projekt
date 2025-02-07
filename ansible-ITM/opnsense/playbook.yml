@@ -88,6 +88,22 @@
         pretty_print: true
         value: "{{ var_ansible_opnsense_api_secret_hash}}"
 
+    - name: Disable Unbound DNS Resolver
+      community.general.xml:
+        path: /conf/config.xml
+        xpath: /opnsense/OPNsense/unboundplus/general/enabled
+        state: present
+        pretty_print: true
+        value: "0"
+
+    - name: Set DHCP Server DNS server
+      community.general.xml:
+        path: /conf/config.xml
+        xpath: /opnsense/dhcpd/lan/dnsserver
+        state: present
+        pretty_print: true
+        value: "{{ var_dhcp_dns_server }}"
+
     - name: Reload configuration
       changed_when: false
       ansible.builtin.command:

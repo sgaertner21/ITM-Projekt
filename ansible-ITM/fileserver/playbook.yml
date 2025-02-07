@@ -1,68 +1,69 @@
-- name: Samba installieren und konfigurieren
+- name: Install and configure Samba
   hosts: "{{ var_hosts_fileserver }}"
-  become: yes
+  become: true
 
-  # TODO: Benutzernamen und Passwort mit Terraform übergeben
+  # TODO: Pass username and password with Terraform
   vars:
     samba_users:
       - name: smbuser
         password: "smbuser"
 
   tasks:
-    # Freigabeordner für Samba erstellen
-    - name: Freigabeordner für Samba erstellen
-      file:
+    # Create shared directory for Samba
+    - name: Create shared directory for Samba
+      ansible.builtin.file:
         path: /srv/samba/shared
         state: directory
         mode: '0775'
         owner: nobody
         group: nogroup
 
-    # Samba-Paket installieren
-    - name: Installiere Samba
-      package:
+    # Install Samba package
+    - name: Install Samba
+      ansible.builtin.apt:
+        update_cache: true
         name: samba
         state: present
 
-    # Deaktiviere den samba-ad-dc-Dienst
-    - name: Deaktiviere samba-ad-dc
-      systemd:
+    # Disable samba-ad-dc service
+    - name: Disable samba-ad-dc
+      ansible.builtin.systemd:
         name: samba-ad-dc
-        enabled: no
+        enabled: false
         state: stopped
 
-    # smb.conf mit einer Vorlage konfigurieren
-    - name: Konfiguriere smb.conf
-      template:
+    # Configure smb.conf with a template
+    - name: Configure smb.conf
+      ansible.builtin.template:
         src: smb.conf.j2
         dest: /etc/samba/smb.conf
       notify:
-        - smbd neu starten
+        - Restart smbd
 
-    # Sicherstellen, dass der Samba-Dienst aktiviert und gestartet ist
-    - name: smbd-Dienst aktivieren und starten
-      service:
+    # Ensure Samba service is enabled and started
+    - name: Enable and start smbd service
+      ansible.builtin.service:
         name: smbd
         state: started
-        enabled: yes
+        enabled: true
 
-    # Benutzer erstellen und Passwort setzen
-    - name: Systembenutzer für Samba erstellen
+    # Create system user and set password for Samba
+    - name: Create system user for Samba
       ansible.builtin.user:
         name: "{{ item.name }}"
         shell: /sbin/nologin
         state: present
       with_items: "{{ samba_users }}"
 
-    - name: Samba-Benutzer hinzufügen und Passwort setzen
-      shell: |
+    - name: Add Samba user and set password
+      ansible.builtin.shell: |
         echo -e "{{ item.password }}\n{{ item.password }}" | smbpasswd -a -s {{ item.name }}
       with_items: "{{ samba_users }}"
       args:
         executable: /bin/bash
 
   handlers:
-    - name: smbd neu starten
-      service:
+    - name: Restart smbd
+      ansible.builtin.service:
         name: smbd
         state: restarted
