@@ -14,7 +14,7 @@
       ansible.builtin.file:
         path: /srv/samba/shared
         state: directory
-        mode: '0775'
+        mode: '0770'
         owner: nobody
         group: nogroup
 
