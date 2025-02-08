@@ -157,12 +157,32 @@ resource "proxmox_vm_qemu" "ansible" {
     inline = [
       "if [ ! -f /var/lib/cloud/instance/boot-finished ]; then echo 'Waiting for cloud-init...'; fi",
       "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done",
-      "echo 'cloud-init finished!'",
+      "echo 'cloud-init finished!'"
+    ]
+  }
+}
+
+resource "terraform_data" "run_ansible" {
+  depends_on = [proxmox_vm_qemu.ansible]
+
+  # Scan Ansible-Folder for file changes and trigger replacement on target system
+  triggers_replace = sha1(join("", [for f in fileset("${path.root}/ansible/", "**"): filesha1("${path.root}/ansible/${f}")]))
+
+  connection {
+    host        = var.ip
+    user        = "ansible"
+    private_key = file("~/.ssh/id_rsa")
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "if [ ! -f /var/lib/cloud/instance/boot-finished ]; then echo 'Waiting for cloud-init...'; fi",
+      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done",
+      "rm -rf ~/ansible",
       "mkdir ~/ansible"
     ]
   }
 
-  # Ansible Inventory
   provisioner "file" {
     source = "${path.root}/ansible/"
     destination = "ansible"
