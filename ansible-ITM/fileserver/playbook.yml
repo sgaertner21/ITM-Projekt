@@ -66,6 +66,11 @@
             writable: true
         samba_users: "{{ linux_samba_users }}" #TODO: Fehler - Benutzer wird nicht erstellt
         samba_workgroup: WORKGROUP
+        
+    - name: Debug samba_users
+      ansible.builtin.debug:
+        var: samba_users
+
 
     - name: Change ownership group of /srv/shares/nextcloud
       ansible.builtin.file:
