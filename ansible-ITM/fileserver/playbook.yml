@@ -48,7 +48,7 @@
             force_create_mode: "0000"
             force_directory_mode: "0000"
             owner: nobody
-            path: /srv/nextcloud/data
+            path: /srv/shares/nextcloud/data
             valid_users: "@nextcloud-group"
             write_list: "@nextcloud-group"
             writable: true
@@ -60,12 +60,17 @@
             force_create_mode: "0000"
             force_directory_mode: "0000"
             owner: nobody
-            path: /srv/nextcloud/config
+            path: /srv/shares/nextcloud/config
             valid_users: "@nextcloud-group"
             write_list: "@nextcloud-group"
             writable: true
-        samba_users: "{{ linux_samba_users | map('extract', ['name', 'password']) | list }}" #TODO: Fehler - Benutzer wird nicht erstellt
+        samba_users: "{{ linux_samba_users }}" #TODO: Fehler - Benutzer wird nicht erstellt
         samba_workgroup: WORKGROUP
+
+    - name: Change ownership group of /srv/shares/nextcloud
+      ansible.builtin.file:
+        group: nextcloud-group
+        state: directory
 
 # -------------------------------------------------------------------
 # - name: Install and configure Samba
