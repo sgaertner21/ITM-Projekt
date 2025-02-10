@@ -59,7 +59,7 @@ locals {
     # "var_webserver=${var.vm_name}",
     # "var_external_port=${var.external_port}",
     "var_smb_nextcloud_user=${var.smb_nextcloud_user}",
-    "var_smb_nextcloud_password=${var.smb_nextcloud_password}"
+    "var_smb_nextcloud_password=${nonsensitive(var.smb_nextcloud_password)}"
   ]
 }
 
@@ -75,9 +75,9 @@ resource "terraform_data" "run_ansible" {
   provisioner "remote-exec" {
     inline = [
       "cd ~/ansible",
-      "command=\"ansible-inventory -i inventory_proxmox.yml --host ${proxmox_vm_qemu.docker-swarm[0].name} --yaml | grep ansible_host\"",
+      "command=\"ansible-inventory -i inventory_proxmox.yml --host ${proxmox_vm_qemu.docker-swarm[keys(var.docker_vms)[0]].name} --yaml | grep ansible_host\"",
       "while ! eval $command; do echo \"Waiting for ansible inventory to build up...\"; sleep 5; done",
-      "echo \"Host ${proxmox_vm_qemu.docker-swarm[0].name} found in ansible inventory!\"",
+      "echo \"Host ${proxmox_vm_qemu.docker-swarm[keys(var.docker_vms)[0]].name} found in ansible inventory!\"",
       "ansible-playbook -i inventory_proxmox.yml --extra-vars \"${join(" ", local.ansible_variables)}\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\" docker-swarm/playbook.yml"
     ]
   }
