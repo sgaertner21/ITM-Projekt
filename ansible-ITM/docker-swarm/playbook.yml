@@ -60,7 +60,7 @@
         state: present
 
 - name: Initialize Swarm Manager
-  hosts: swarm-manager[0]
+  hosts: swarm_manager[0]
   become: true
   tasks:
     - name: Initialize Docker Swarm
@@ -70,7 +70,7 @@
       register: swarm_init
 
 - name: Join remaining Manager Nodes to Swarm
-  hosts: swarm-manager:!swarm-manager[0]
+  hosts: swarm_manager:!swarm_manager[0]
   become: true
   tasks:
     - name: Join Docker Swarm Cluster
@@ -78,10 +78,10 @@
         state: join
         join_token: "{{ swarm_init.swarm_facts.JoinTokens.Manager }}"
         remote_addrs:
-          - "{{ hostvars[groups['swarm-manager'][0]].ansible_host }}"
+          - "{{ hostvars[groups['swarm_manager'][0]].ansible_host }}"
 
 - name: Join Worker Nodes to Swarm
-  hosts: swarm-worker
+  hosts: swarm_worker
   become: true
   tasks:
     - name: Join Docker Swarm Cluster
@@ -89,7 +89,7 @@
         state: join
         join_token: "{{ swarm_init.swarm_facts.JoinTokens.Worker }}"
         remote_addrs:
-          - "{{ hostvars[groups['swarm-manager'][0]].ansible_host }}"
+          - "{{ hostvars[groups['swarm_manager'][0]].ansible_host }}"
 
 
 - name: Mount SMB share
