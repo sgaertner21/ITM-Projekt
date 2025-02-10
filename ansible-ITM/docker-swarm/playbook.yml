@@ -76,7 +76,7 @@
     - name: Join Docker Swarm Cluster
       community.docker.docker_swarm:
         state: join
-        join_token: "{{ swarm_init.swarm_facts.JoinTokens.Manager }}"
+        join_token: "{{ hostvars[groups['swarm_manager'][0]].swarm_init.swarm_facts.JoinTokens.Manager }}"
         remote_addrs:
           - "{{ hostvars[groups['swarm_manager'][0]].ansible_host }}"
 
@@ -87,7 +87,7 @@
     - name: Join Docker Swarm Cluster
       community.docker.docker_swarm:
         state: join
-        join_token: "{{ swarm_init.swarm_facts.JoinTokens.Worker }}"
+        join_token: "{{ hostvars[groups['swarm_manager'][0]].swarm_init.swarm_facts.JoinTokens.Worker }}"
         remote_addrs:
           - "{{ hostvars[groups['swarm_manager'][0]].ansible_host }}"
 
