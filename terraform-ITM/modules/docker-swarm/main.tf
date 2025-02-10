@@ -59,7 +59,8 @@ locals {
     # "var_webserver=${var.vm_name}",
     # "var_external_port=${var.external_port}",
     "var_smb_nextcloud_user=${var.smb_nextcloud_user}",
-    "var_smb_nextcloud_password=${nonsensitive(var.smb_nextcloud_password)}"
+    "var_smb_nextcloud_password=${nonsensitive(var.smb_nextcloud_password)}",
+    "va"
   ]
 }
 
