@@ -61,16 +61,6 @@ resource "random_password" "nextcloud_smb_password" {
 
 locals {
   smb_nextcloud_user = "nextcloud-user"
-  ansible_variables_old = [
-    "var_hosts_fileserver=${var.vm_name}",
-    "var_samba_groups=[{\\\"name\\\": \\\"nextcloud-group\\\"}]",
-    "var_samba_users=[{\\\"name\\\": \\\"${local.smb_nextcloud_user}\\\", \\\"password\\\": \\\"${nonsensitive(random_password.nextcloud_smb_password.result)}\\\", \\\"group\\\": \\\"nextcloud-group\\\"}]",
-    "var_nextcloud_data_owner_group=nextcloud-group",
-    "var_nextcloud_data_valid_users=@nextcloud-group",
-    "var_nextcloud_data_write_list=@nextcloud-group",
-    "var_nextcloud_config_valid_users=@nextcloud-group",
-    "var_nextcloud_config_write_list=@nextcloud-group",
-  ]
   ansible_variables = replace(jsonencode({
     var_hosts_fileserver = var.vm_name,
     var_samba_groups = [
