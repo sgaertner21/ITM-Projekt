@@ -1,14 +1,10 @@
-- name: Samba Server
+- name: Install Samba Server and shares
   hosts: "{{ var_hosts_fileserver }}"
   become: true
 
   vars:
     linux_samba_groups: "{{ var_samba_groups }}"
-      # - name: nextcloud-group
     linux_samba_users: "{{ var_samba_users }}"
-      # - name: nextcloud-user
-      #   password: "nextcloud-user"
-      #   group: nextcloud-group
         
   tasks:
     - name: Update apt cache
@@ -53,7 +49,7 @@
             owner: nobody
             group: "{{ var_nextcloud_data_owner_group }}"
             path: /srv/shares/nextcloud/data
-            valid_users: "{{ var_nextcloud_data_valid_users }}" #"@nextcloud-group"
+            valid_users: "{{ var_nextcloud_data_valid_users }}"
             write_list: "{{ var_nextcloud_data_write_list }}"
             writable: true
           - name: Nextcloud Config
