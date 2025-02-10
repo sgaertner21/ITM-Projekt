@@ -113,3 +113,39 @@ module "fileserver" {
         ansible_ip      = var.ansible_vm_ip
         ansible_ssh_key = module.ansible.public_ssh_key
 }
+
+module "docker-swarm" {
+        depends_on = [module.bind9, module.OPNsense]
+
+        source          = "./modules/docker-swarm"
+        docker_vms = merge(
+                tomap({for i in range(var.number_docker_swarm_manager_nodes) : "docker-swarm-manager-${i+1}" => {
+                                ip             = "dhcp"
+                                gateway        = ""
+                                proxmox_node   = var.docker-swarm_proxmox_node
+                                cores          = var.docker-swarm_vm_cores
+                                memory         = var.docker-swarm_vm_memory
+                                network_bridge = "vmbr1"
+                                ssh_keys       = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
+                                tags           = ["swarm","swarm-manager"]
+                }}),
+                tomap({for i in range(var.number_docker_swarm_worker_nodes) : "docker-swarm-worker-${i+1}" => {
+                                ip             = "dhcp"
+                                gateway        = ""
+                                proxmox_node   = var.docker-swarm_proxmox_node
+                                cores          = var.docker-swarm_vm_cores
+                                memory         = var.docker-swarm_vm_memory
+                                network_bridge = "vmbr1"
+                                ssh_keys       = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
+                                tags           = ["swarm","swarm-worker"]
+                }})
+        )
+        ansible_ip      = var.ansible_vm_ip
+        ansible_ssh_key = module.ansible.public_ssh_key
+        opnsense_vm_name = var.opnsense_vm_name
+        opnsense_api_key = module.OPNsense.opnsense_api_key
+        opnsense_api_secret = module.OPNsense.opnsense_api_secret
+        external_port   = var.docker-swarm_external_port
+        smb_nextcloud_user = module.fileserver.smb_nextcloud_user
+        smb_nextcloud_password = module.fileserver.smb_nextcloud_password
+}

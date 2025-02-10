@@ -18,3 +18,7 @@ compose:
         | flatten
         | map('regex_replace', '/.*$', '')
         | first
+groups:
+    swarm: "'swarm' in (proxmox_tags_parsed|list)"
+    swarm-manager: "'swarm-manager' in (proxmox_tags_parsed|list)"
+    swarm-worker: "'swarm-worker' in (proxmox_tags_parsed|list)"

@@ -1,0 +1,121 @@
+- name: Install Docker on Swarm Nodes
+  hosts: swarm
+  become: true
+  tasks:
+    - name: Install prerequisites
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+        state: present
+        update_cache: true
+
+    - name: Download Docker's official GPG key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: "0644"
+        force: false
+
+    - name: Retrieve dpkg architecture
+      ansible.builtin.command: dpkg --print-architecture
+      register: dpkg_arch_result
+      changed_when: false
+
+    - name: Set dpkg architecture fact  # Saves the architecture as a fact for later use
+      ansible.builtin.set_fact:
+        dpkg_arch: "{{ dpkg_arch_result.stdout }}"
+
+    - name: Retrieve Ubuntu version codename dynamically  # Identifies the Ubuntu version
+      ansible.builtin.shell: |
+        set -o pipefail && grep 'VERSION_CODENAME=' /etc/os-release | cut -d'=' -f2
+      args:
+        executable: /bin/bash
+      register: codename_result
+      changed_when: false
+
+    - name: Set version codename fact dynamically  # Saves the Ubuntu version codename as a fact
+      ansible.builtin.set_fact:
+        version_codename: "{{ codename_result.stdout }}"
+
+    - name: Add Docker to sources list  # Configures apt to use Docker's repository
+      ansible.builtin.lineinfile:
+        path: /etc/apt/sources.list.d/docker.list
+        line: "deb [arch={{ dpkg_arch }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ version_codename }} stable"
+        create: true
+        state: present
+        mode: '0644'
+
+    - name: Update apt-get  # Refreshes the package database
+      ansible.builtin.apt:
+        update_cache: true
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+
+    - name: Install Python Docker SDK (if needed)
+      ansible.builtin.pip:
+        name: docker
+        state: present
+
+- name: Initialize Swarm Manager
+  hosts: swarm-manager[0]
+  become: true
+  tasks:
+    - name: Initialize Docker Swarm
+      community.docker.docker_swarm:
+        state: present
+        advertise_addr: "{{ ansible_host }}"
+      register: swarm_init
+
+- name: Join remaining Manager Nodes to Swarm
+  hosts: swarm-manager:!swarm-manager[0]
+  become: true
+  tasks:
+    - name: Join Docker Swarm Cluster
+      community.docker.docker_swarm:
+        state: join
+        join_token: "{{ swarm_init.swarm_facts.JoinTokens.Manager }}"
+        remote_addrs:
+          - "{{ hostvars[groups['swarm-manager'][0]].ansible_host }}"
+
+- name: Join Worker Nodes to Swarm
+  hosts: swarm-worker
+  become: true
+  tasks:
+    - name: Join Docker Swarm Cluster
+      community.docker.docker_swarm:
+        state: join
+        join_token: "{{ swarm_init.swarm_facts.JoinTokens.Worker }}"
+        remote_addrs:
+          - "{{ hostvars[groups['swarm-manager'][0]].ansible_host }}"
+
+
+- name: Mount SMB share
+  hosts: swarm
+  become: true
+  tasks:
+    - name: Ensure cifs-utils is installed
+      ansible.builtin.package:
+        name: cifs-utils
+        state: present
+
+    - name: Mount SMB Nextcloud Data share
+      ansible.posix.mount:
+        src: "//{{ hostvars['fileserver'].ansible_host }}/Nextcloud Data/"
+        path: "/mnt/nextcloud_data"
+        fstype: "cifs"
+        opts: "username={{ var_smb_nextcloud_user }},password={{ var_smb_nextcloud_password }},file_mode=0644,dir_mode=0755"
+        state: "mounted"
+
+    - name: Mount SMB Nextcloud Config share
+      ansible.posix.mount:
+        src: "//{{ fileserver_ip }}/Nextcloud Config/"
+        path: "/mnt/nextcloud_config"
+        fstype: "cifs"
+        opts: "username={{ var_smb_nextcloud_user }},password={{ var_smb_nextcloud_password }},file_mode=0644,dir_mode=0755"
+        state: "mounted"
