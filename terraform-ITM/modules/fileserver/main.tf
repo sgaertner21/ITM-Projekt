@@ -7,12 +7,6 @@ terraform {
   }
 }
 
-locals {
-  ansible_variables = [
-    "var_hosts_fileserver=${var.vm_name}"
-  ]
-}
-
 resource "proxmox_vm_qemu" "fileserver" {
   name        = var.vm_name
   vmid        = var.vm_id
@@ -46,11 +40,58 @@ resource "proxmox_vm_qemu" "fileserver" {
     slot    = "virtio0"
   }
 
+  disk {
+    storage = "local"
+    type    = "disk"
+    size    = "300G"
+    slot    = "virtio1"
+  }
+
   # Netzwerk
   network {
     model  = "virtio"
     bridge = var.network_bridge
   }
+}
+
+resource "random_password" "nextcloud_smb_password" {
+  length  = 32
+  special = false
+}
+
+locals {
+  smb_nextcloud_user = "nextcloud-user"
+  ansible_variables_old = [
+    "var_hosts_fileserver=${var.vm_name}",
+    "var_samba_groups=[{\\\"name\\\": \\\"nextcloud-group\\\"}]",
+    "var_samba_users=[{\\\"name\\\": \\\"${local.smb_nextcloud_user}\\\", \\\"password\\\": \\\"${nonsensitive(random_password.nextcloud_smb_password.result)}\\\", \\\"group\\\": \\\"nextcloud-group\\\"}]",
+    "var_nextcloud_data_owner_group=nextcloud-group",
+    "var_nextcloud_data_valid_users=@nextcloud-group",
+    "var_nextcloud_data_write_list=@nextcloud-group",
+    "var_nextcloud_config_valid_users=@nextcloud-group",
+    "var_nextcloud_config_write_list=@nextcloud-group",
+  ]
+  ansible_variables = replace(jsonencode({
+    var_hosts_fileserver = var.vm_name,
+    var_samba_groups = [
+      {
+        name = "nextcloud-group"
+      }
+    ],
+    var_samba_users = [
+      {
+        name     = local.smb_nextcloud_user
+        password = nonsensitive(random_password.nextcloud_smb_password.result)
+        group    = "nextcloud-group"
+      }
+    ],
+    var_nextcloud_data_owner_group = "nextcloud-group",
+    var_nextcloud_data_valid_users = "@nextcloud-group",
+    var_nextcloud_data_write_list = "@nextcloud-group",
+    var_nextcloud_config_owner_group = "nextcloud-group",
+    var_nextcloud_config_valid_users = "@nextcloud-group",
+    var_nextcloud_config_write_list = "@nextcloud-group",
+  }), "\"", "\\\"")
 }
 
 resource "terraform_data" "run_ansible" {
@@ -68,7 +109,7 @@ resource "terraform_data" "run_ansible" {
       "command=\"ansible-inventory -i inventory_proxmox.yml --host ${var.vm_name} --yaml | grep ansible_host\"",
       "while ! eval $command; do echo \"Waiting for ansible inventory to build up...\"; sleep 5; done",
       "echo \"Host ${var.vm_name} found in ansible inventory!\"",
-      "ansible-playbook -i inventory_proxmox.yml --extra-vars \"${join(" ", local.ansible_variables)}\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\" fileserver/playbook.yml"
+      "ansible-playbook -i inventory_proxmox.yml --extra-vars \"${local.ansible_variables}\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\" fileserver/playbook.yml"
     ]
   }
 }

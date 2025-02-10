@@ -2,17 +2,20 @@
   hosts: "{{ var_hosts_fileserver }}"
   become: true
 
-  # TODO: Pass username and password with Terraform
   vars:
-    linux_samba_groups:
-      - name: nextcloud-group
-    linux_samba_users:
-      - name: nextcloud-user
-        password: "nextcloud-user"
-        group: nextcloud-group
+    linux_samba_groups: "{{ var_samba_groups }}"
+      # - name: nextcloud-group
+    linux_samba_users: "{{ var_samba_users }}"
+      # - name: nextcloud-user
+      #   password: "nextcloud-user"
+      #   group: nextcloud-group
         
   tasks:
-    - name: Gruppe erstellen
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Create groups
       ansible.builtin.group:
         name: "{{ item.name }}"
         state: present
@@ -48,9 +51,10 @@
             force_create_mode: "0000"
             force_directory_mode: "0000"
             owner: nobody
+            group: "{{ var_nextcloud_data_owner_group }}"
             path: /srv/shares/nextcloud/data
-            valid_users: "@nextcloud-group"
-            write_list: "@nextcloud-group"
+            valid_users: "{{ var_nextcloud_data_valid_users }}" #"@nextcloud-group"
+            write_list: "{{ var_nextcloud_data_write_list }}"
             writable: true
           - name: Nextcloud Config
             comment: Nextcloud Config store
@@ -60,90 +64,10 @@
             force_create_mode: "0000"
             force_directory_mode: "0000"
             owner: nobody
+            group: "{{ var_nextcloud_config_owner_group }}"
             path: /srv/shares/nextcloud/config
-            valid_users: "@nextcloud-group"
-            write_list: "@nextcloud-group"
+            valid_users: "{{ var_nextcloud_config_valid_users }}"
+            write_list:  "{{ var_nextcloud_config_write_list }}"
             writable: true
-        samba_users: "{{ linux_samba_users }}" #TODO: Fehler - Benutzer wird nicht erstellt
+        samba_users: "{{ linux_samba_users }}"
         samba_workgroup: WORKGROUP
-        
-    - name: Debug samba_users
-      ansible.builtin.debug:
-        var: samba_users
-
-
-    - name: Change ownership group of /srv/shares/nextcloud
-      ansible.builtin.file:
-        group: nextcloud-group
-        state: directory
-
-# -------------------------------------------------------------------
-# - name: Install and configure Samba
-#   hosts: "{{ var_hosts_fileserver }}"
-#   become: true
-
-#   # TODO: Pass username and password with Terraform
-#   vars:
-#     samba_users:
-#       - name: smbuser
-#         password: "smbuser"
-
-#   tasks:
-#     # Create shared directory for Samba
-#     - name: Create shared directory for Samba
-#       ansible.builtin.file:
-#         path: /srv/samba/shared
-#         state: directory
-#         mode: '0770'
-#         owner: nobody
-#         group: nogroup
-
-#     # Install Samba package
-#     - name: Install Samba
-#       ansible.builtin.apt:
-#         update_cache: true
-#         name: samba
-#         state: present
-
-#     # Disable samba-ad-dc service
-#     - name: Disable samba-ad-dc
-#       ansible.builtin.systemd:
-#         name: samba-ad-dc
-#         enabled: false
-#         state: stopped
-
-#     # Configure smb.conf with a template
-#     - name: Configure smb.conf
-#       ansible.builtin.template:
-#         src: smb.conf.j2
-#         dest: /etc/samba/smb.conf
-#       notify:
-#         - Restart smbd
-
-#     # Ensure Samba service is enabled and started
-#     - name: Enable and start smbd service
-#       ansible.builtin.service:
-#         name: smbd
-#         state: started
-#         enabled: true
-
-#     # Create system user and set password for Samba
-#     - name: Create system user for Samba
-#       ansible.builtin.user:
-#         name: "{{ item.name }}"
-#         shell: /sbin/nologin
-#         state: present
-#       with_items: "{{ samba_users }}"
-
-#     - name: Add Samba user and set password
-#       ansible.builtin.shell: |
-#         echo -e "{{ item.password }}\n{{ item.password }}" | smbpasswd -a -s {{ item.name }}
-#       with_items: "{{ samba_users }}"
-#       args:
-#         executable: /bin/bash
-
-#   handlers:
-#     - name: Restart smbd
-#       ansible.builtin.service:
-#         name: smbd
-#         state: restarted
