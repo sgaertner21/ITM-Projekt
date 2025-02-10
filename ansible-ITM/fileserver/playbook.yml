@@ -1,3 +1,32 @@
+- name: Format and mount a disk
+  hosts: "{{ var_hosts_fileserver }}"
+  become: true
+
+  vars:
+    disk_device: "/dev/vdb"
+    mount_point: "/srv/shares"
+    filesystem_type: "ext4"
+
+  tasks:
+    - name: Format the disk
+      community.general.filesystem:
+        fstype: "{{ filesystem_type }}"
+        dev: "{{ disk_device }}"
+
+    - name: Create the mount point directory
+      ansible.builtin.file:
+        path: "{{ mount_point }}"
+        state: directory
+
+    - name: Mount the disk
+      ansible.posix.mount:
+        boot: true
+        path: "{{ mount_point }}"
+        src: "{{ disk_device }}"
+        fstype: "{{ filesystem_type }}"
+        opts: "defaults"
+        state: mounted
+
 - name: Install Samba Server and shares
   hosts: "{{ var_hosts_fileserver }}"
   become: true
