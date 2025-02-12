@@ -1,0 +1,80 @@
+- name: Nextcloud AIO
+  hosts: swarm_manager[0]
+  become: true
+  vars:
+    DATABASE_PASSWORD:
+    FULLTEXTSEARCH_PASSWORD:
+    IMAGINARY_SECRET:
+    NC_DOMAIN: "yourdomain.com"
+    NEXTCLOUD_PASSWORD:
+    ONLYOFFICE_SECRET:
+    RECORDING_SECRET:
+    REDIS_PASSWORD:
+    SIGNALING_SECRET:
+    TALK_INTERNAL_SECRET:
+    TIMEZONE: Europe/Berlin
+    TURN_SECRET:
+    WHITEBOARD_SECRET:
+
+    CLAMAV_ENABLED: "no"
+    COLLABORA_ENABLED: "no"
+    FULLTEXTSEARCH_ENABLED: "no"
+    IMAGINARY_ENABLED: "no"
+    ONLYOFFICE_ENABLED: "no"
+    TALK_ENABLED: "no"
+    TALK_RECORDING_ENABLED: "no"
+    WHITEBOARD_ENABLED: "no"
+
+    APACHE_IP_BINDING: "0.0.0.0"
+    APACHE_MAX_SIZE: "17179869184"
+    APACHE_PORT: "443"
+    COLLABORA_DICTIONARIES: "de_DE en_GB en_US es_ES fr_FR it nl pt_BR pt_PT ru"
+    COLLABORA_SECCOMP_POLICY: "--o:security.seccomp: true"
+    INSTALL_LATEST_MAJOR: "no"
+    NEXTCLOUD_ADDITIONAL_APKS: imagemagick
+    NEXTCLOUD_ADDITIONAL_PHP_EXTENSIONS: imagick
+    NEXTCLOUD_DATADIR: nextcloud_aio_nextcloud_data
+    NEXTCLOUD_MAX_TIME: "3600"
+    NEXTCLOUD_MEMORY_LIMIT: 512M
+    NEXTCLOUD_MOUNT: /mnt/          
+    NEXTCLOUD_STARTUP_APPS: "deck twofactor_totp tasks calendar contacts notes"
+    NEXTCLOUD_TRUSTED_CACERTS_DIR: /usr/local/share/ca-certificates/my-custom-ca
+    NEXTCLOUD_UPLOAD_LIMIT: 16G
+    REMOVE_DISABLED_APPS: "yes"
+    TALK_PORT: "3478"
+    UPDATE_NEXTCLOUD_APPS: "no"
+
+  tasks:
+    - name: Copy compose file
+      ansible.builtin.template:
+        src: "compose.j2"
+        dest: "/root/docker-compose.yml"
+        mode: '0644'
+        force: true
+
+    - name: Deploy Nextcloud AIO container in Swarm mode
+      community.docker.docker_stack:
+        name: nextcloud_aio
+        compose:
+          - "/root/docker-compose.yml"
+        state: present
+
+# project_name: nextcloud_aio
+# definition:
+#   version: '3.8'
+#   services:
+#     nextcloud_aio_mastercontainer:
+#       image: "{{ nextcloud_image }}"
+#       ports:
+#         - "8080:8080"
+#       volumes:
+#         - "/var/run/docker.sock:/var/run/docker.sock" # Required for AIO management
+#         - "{{ nextcloud_config_path }}:/mnt/nextcloud_config" # Persistent configuration on SMB share
+#         - "{{ nextcloud_data_path }}:/mnt/ncdata" # Persistent data on SMB share
+#       environment:
+#         NEXTCLOUD_DATADIR: "/mnt/ncdata"
+#       deploy:
+#         replicas: 1
+#         placement:
+#           constraints:
+#             - node.role == manager

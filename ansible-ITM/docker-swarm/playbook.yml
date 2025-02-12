@@ -91,7 +91,6 @@
         remote_addrs:
           - "{{ hostvars[groups['swarm_manager'][0]].ansible_host }}"
 
-
 - name: Mount SMB share
   hosts: swarm
   become: true

@@ -50,12 +50,12 @@ resource "proxmox_vm_qemu" "docker-swarm" {
 }
 
   # "var_hosts_webserver=${var.vm_name}",
-    # "var_hosts_opnsense=${var.opnsense_vm_name}",
-    # "var_opnsense_firewall=${var.opnsense_vm_name}",
-    # "var_opnsense_api_key=${var.opnsense_api_key}",
-    # "var_opnsense_api_secret=${nonsensitive(var.opnsense_api_secret)}",
-    # "var_webserver=${var.vm_name}",
-    # "var_external_port=${var.external_port}",
+  # "var_hosts_opnsense=${var.opnsense_vm_name}",
+  # "var_opnsense_firewall=${var.opnsense_vm_name}",
+  # "var_opnsense_api_key=${var.opnsense_api_key}",
+  # "var_opnsense_api_secret=${nonsensitive(var.opnsense_api_secret)}",
+  # "var_webserver=${var.vm_name}",
+  # "var_external_port=${var.external_port}",
 locals {
   ansible_variables = replace(jsonencode({
     var_smb_nextcloud_user = var.smb_nextcloud_user,
