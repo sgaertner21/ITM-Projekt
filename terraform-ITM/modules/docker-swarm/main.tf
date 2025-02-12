@@ -49,19 +49,18 @@ resource "proxmox_vm_qemu" "docker-swarm" {
   }
 }
 
-locals {
-  ansible_variables = [
-    # "var_hosts_webserver=${var.vm_name}",
+  # "var_hosts_webserver=${var.vm_name}",
     # "var_hosts_opnsense=${var.opnsense_vm_name}",
     # "var_opnsense_firewall=${var.opnsense_vm_name}",
     # "var_opnsense_api_key=${var.opnsense_api_key}",
     # "var_opnsense_api_secret=${nonsensitive(var.opnsense_api_secret)}",
     # "var_webserver=${var.vm_name}",
     # "var_external_port=${var.external_port}",
-    "var_smb_nextcloud_user=${var.smb_nextcloud_user}",
-    "var_smb_nextcloud_password=${nonsensitive(var.smb_nextcloud_password)}",
-    "va"
-  ]
+locals {
+  ansible_variables = replace(jsonencode({
+    var_smb_nextcloud_user = var.smb_nextcloud_user,
+    var_smb_nextcloud_password = nonsensitive(var.smb_nextcloud_password),
+  }), "\"", "\\\"")
 }
 
 resource "terraform_data" "run_ansible" {
@@ -81,7 +80,7 @@ resource "terraform_data" "run_ansible" {
         "while ! eval $command; do echo \"Waiting for ansible inventory to build up...\"; sleep 5; done",
         "echo \"Host ${proxmox_vm_qemu.docker-swarm[vm_name].name} found in ansible inventory!\""
       ]]),
-      ["ansible-playbook -i inventory_proxmox.yml --extra-vars \"${join(" ", local.ansible_variables)}\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\" docker-swarm/playbook.yml"]
+      ["ansible-playbook -i inventory_proxmox.yml --extra-vars \"${local.ansible_variables}\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\" docker-swarm/playbook.yml"]
     )
   }
 }

@@ -1,154 +1,154 @@
 terraform {
-        required_providers {
-                telmate-proxmox = {
-                        source = "telmate/proxmox"
-                        version = "3.0.1-rc4"
-                }
-                bpg-proxmox = {
-                        source = "bpg/proxmox"
-                        version = "0.69.0"
-                }
-                htpasswd = {
-                        source = "loafoe/htpasswd"
-                        version = "1.2.1"
-                }
-        }
+  required_providers {
+    telmate-proxmox = {
+      source  = "telmate/proxmox"
+      version = "3.0.1-rc4"
+    }
+    bpg-proxmox = {
+      source  = "bpg/proxmox"
+      version = "0.69.0"
+    }
+    htpasswd = {
+      source  = "loafoe/htpasswd"
+      version = "1.2.1"
+    }
+  }
 }
 
 resource "proxmox_virtual_environment_network_linux_bridge" "OPNsense_bridge" {
-        provider = bpg-proxmox
+  provider  = bpg-proxmox
 
-        node_name = var.proxmox_node
-        name = var.proxmox_ve_network_bridge_lan
-        address = "${var.proxmox_lan_ip}/24"
-        comment = "Internal LAN network"
+  node_name = var.proxmox_node
+  name      = var.proxmox_ve_network_bridge_lan
+  address   = "${var.proxmox_lan_ip}/24"
+  comment   = "Internal LAN network"
 }
 
 resource "proxmox_cloud_init_disk" "OPNsense_cloud_init" {
-        provider = telmate-proxmox
+  provider = telmate-proxmox
 
-        name = "cloudinit"
-        pve_node = var.proxmox_node
-        storage = "local"
-        meta_data = yamlencode({
-                instance_id = sha1(var.vm_name)
-                local_hostname = var.vm_name
-        })
-        user_data = templatefile("${path.module}/files/user_data.tftpl", {
-                vm_network_interface_lan = var.vm_network_interface_lan
-                vm_network_interface_wan = var.vm_network_interface_wan
-                vm_lan_ip = var.vm_lan_ip
-                vm_wan_ip = var.vm_wan_ip
-                wan_gateway = var.wan_gateway
-                vm_dns_server = var.vm_dns_server
-                vm_wan_subnet_cidr = "24"
-                ssh_keys_base64 = base64encode(join("\r\n", var.ssh_keys))
-        })
+  name     = "cloudinit"
+  pve_node = var.proxmox_node
+  storage  = "local"
+  meta_data = yamlencode({
+    instance_id    = sha1(var.vm_name)
+    local_hostname = var.vm_name
+  })
+  user_data = templatefile("${path.module}/files/user_data.tftpl", {
+    vm_network_interface_lan = var.vm_network_interface_lan
+    vm_network_interface_wan = var.vm_network_interface_wan
+    vm_lan_ip                = var.vm_lan_ip
+    vm_wan_ip                = var.vm_wan_ip
+    wan_gateway              = var.wan_gateway
+    vm_dns_server            = var.vm_dns_server
+    vm_wan_subnet_cidr       = "24"
+    ssh_keys_base64          = base64encode(join("\r\n", var.ssh_keys))
+  })
 }
 
 resource "proxmox_vm_qemu" "OPNsense_vm" {
-        provider = telmate-proxmox
+  provider = telmate-proxmox
 
-        name = var.vm_name
-        vmid = var.vm_id
-        target_node = var.proxmox_node
+  name        = var.vm_name
+  vmid        = var.vm_id
+  target_node = var.proxmox_node
 
-        # Hardware-Spezifikationen
-        full_clone = true
-        clone = "OPNsense-template"
-        agent = 1
-        memory = var.memory
-        cores = var.cores
-        scsihw = "lsi"
-        onboot = "true"
+  # Hardware-Spezifikationen
+  full_clone = true
+  clone      = "OPNsense-template"
+  agent      = 1
+  memory     = var.memory
+  cores      = var.cores
+  scsihw     = "lsi"
+  onboot     = "true"
 
-        # Speicher VM
-        disk {
-                storage = "local"
-                type = "disk"
-                size = "20G"
-                format = "qcow2"
-                slot = "scsi0"
-                emulatessd = true
-        }
+  # Speicher VM
+  disk {
+    storage    = "local"
+    type       = "disk"
+    size       = "20G"
+    format     = "qcow2"
+    slot       = "scsi0"
+    emulatessd = true
+  }
 
-        # Clodinit Disk
-        disk {
-                storage = "local"
-                type = "cdrom"
-                iso = "${proxmox_cloud_init_disk.OPNsense_cloud_init.id}"
-                format = "qcow2"
-                slot = "ide0"
-        }
+  # Cloudinit Disk
+  disk {
+    storage = "local"
+    type    = "cdrom"
+    iso     = "${proxmox_cloud_init_disk.OPNsense_cloud_init.id}"
+    format  = "qcow2"
+    slot    = "ide0"
+  }
 
-        boot = "order=scsi0"
+  boot = "order=scsi0"
 
-        # Netzwerk
-        network {
-                model = "e1000"
-                bridge = var.proxmox_ve_network_bridge_wan
-        }
-        network {
-                model = "e1000"
-                bridge = proxmox_virtual_environment_network_linux_bridge.OPNsense_bridge.name
-        }
+  # Netzwerk
+  network {
+    model  = "e1000"
+    bridge = var.proxmox_ve_network_bridge_wan
+  }
+  network {
+    model  = "e1000"
+    bridge = proxmox_virtual_environment_network_linux_bridge.OPNsense_bridge.name
+  }
 
-        connection {
-                host = var.vm_wan_ip
-                user = "root"
-                private_key = file("~/.ssh/id_rsa")
-                timeout = "10m"
-        }
+  connection {
+    host        = var.vm_wan_ip
+    user        = "root"
+    private_key = file("~/.ssh/id_rsa")
+    timeout     = "10m"
+  }
 
-        provisioner "remote-exec" {
-                inline = [
-                        "if [ ! -f /var/lib/cloud/instance/boot-finished ]; then echo 'Waiting for cloud-init...'; fi",
-                        "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done",
-                        "echo 'cloud-init finished!'"
-                ]
-        }
+  provisioner "remote-exec" {
+    inline = [
+      "if [ ! -f /var/lib/cloud/instance/boot-finished ]; then echo 'Waiting for cloud-init...'; fi",
+      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done",
+      "echo 'cloud-init finished!'"
+    ]
+  }
 }
 
 locals {
-        ansible_variables = [
-                "var_hosts_opnsense=${var.vm_name}",
-                "var_ansible_public_ssh_key=${chomp(var.ansible_ssh_key)}",
-                "var_ansible_opnsense_api_key=${random_id.opnsense_api_key.b64_std}",
-                "var_ansible_opnsense_api_secret_hash=${replace(nonsensitive(htpasswd_password.opnsense_api_secret_hash.sha512), "$", "\\$")}",
-                "var_dhcp_dns_server=${var.dhcp_dns_server}"
-        ]
+  ansible_variables = replace(jsonencode({
+    var_hosts_opnsense = var.vm_name
+    var_ansible_public_ssh_key = chomp(var.ansible_ssh_key)
+    var_ansible_opnsense_api_key = random_id.opnsense_api_key.b64_std
+    var_ansible_opnsense_api_secret_hash = replace(nonsensitive(htpasswd_password.opnsense_api_secret_hash.sha512), "$", "\\$")
+    var_dhcp_dns_server = var.dhcp_dns_server
+  }), "\"", "\\\"")
 }
 
 resource "terraform_data" "run_ansible" {
-        depends_on = [ proxmox_vm_qemu.OPNsense_vm ]
+  depends_on = [ proxmox_vm_qemu.OPNsense_vm ]
 
-        connection {
-                host        =   var.ansible_ip
-                user        =   "ansible"
-                private_key =   file("~/.ssh/id_rsa")
-        }
+  connection {
+    host        = var.ansible_ip
+    user        = "ansible"
+    private_key = file("~/.ssh/id_rsa")
+  }
 
-        provisioner "remote-exec" {
-                inline = [
-                        "cd ~/ansible",
-                        "command=\"ansible-inventory -i inventory_proxmox.yml --host ${var.vm_name} --yaml | grep ansible_host\"",
-                        "while ! eval $command; do echo \"Waiting for ansible inventory to build up...\"; sleep 5; done",
-                        "echo \"Host ${var.vm_name} found in ansible inventory!\"",
-                        "ansible-playbook -i inventory_proxmox.yml --extra-vars \"${join(" ", local.ansible_variables)}\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\" opnsense/playbook.yml"
-                ]          
-        }
+  provisioner "remote-exec" {
+    inline = [
+      "cd ~/ansible",
+      "command=\"ansible-inventory -i inventory_proxmox.yml --host ${var.vm_name} --yaml | grep ansible_host\"",
+      "while ! eval $command; do echo \"Waiting for ansible inventory to build up...\"; sleep 5; done",
+      "echo \"Host ${var.vm_name} found in ansible inventory!\"",
+      "ansible-playbook -i inventory_proxmox.yml --extra-vars \"${local.ansible_variables}\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\" opnsense/playbook.yml"
+    ]
+  }
 }
 
 resource "random_id" "opnsense_api_key" {
-        byte_length     = 60
+  byte_length = 60
 }
 
- resource "random_bytes" "opnsense_api_secret" {
-        length          = 30
- }
+resource "random_bytes" "opnsense_api_secret" {
+  length = 30
+}
 
 resource "htpasswd_password" "opnsense_api_secret_hash" {
-        password = random_bytes.opnsense_api_secret.base64
+  password = random_bytes.opnsense_api_secret.base64
 }
 
 

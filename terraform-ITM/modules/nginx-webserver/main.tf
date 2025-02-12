@@ -48,15 +48,15 @@ resource "proxmox_vm_qemu" "nginx-webserver" {
 }
 
 locals {
-  ansible_variables = [
-    "var_hosts_webserver=${var.vm_name}",
-    "var_hosts_opnsense=${var.opnsense_vm_name}",
-    "var_opnsense_firewall=${var.opnsense_vm_name}",
-    "var_opnsense_api_key=${var.opnsense_api_key}",
-    "var_opnsense_api_secret=${nonsensitive(var.opnsense_api_secret)}",
-    "var_webserver=${var.vm_name}",
-    "var_external_port=${var.external_port}",
-  ]
+  ansible_variables = replace(jsonencode({
+    var_hosts_webserver = var.vm_name
+    var_hosts_opnsense = var.opnsense_vm_name
+    var_opnsense_firewall = var.opnsense_vm_name
+    var_opnsense_api_key = var.opnsense_api_key
+    var_opnsense_api_secret = nonsensitive(var.opnsense_api_secret)
+    var_webserver = var.vm_name
+    var_external_port = var.external_port
+  }), "\"", "\\\"")
 }
 
 resource "terraform_data" "run_ansible" {
@@ -74,7 +74,7 @@ resource "terraform_data" "run_ansible" {
       "command=\"ansible-inventory -i inventory_proxmox.yml --host ${var.vm_name} --yaml | grep ansible_host\"",
       "while ! eval $command; do echo \"Waiting for ansible inventory to build up...\"; sleep 5; done",
       "echo \"Host ${var.vm_name} found in ansible inventory!\"",
-      "ansible-playbook -i inventory_proxmox.yml --extra-vars \"${join(" ", local.ansible_variables)}\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\" nginx-webserver/playbook.yml"
+      "ansible-playbook -i inventory_proxmox.yml --extra-vars \"${local.ansible_variables}\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\" nginx-webserver/playbook.yml"
     ]
   }
 }
