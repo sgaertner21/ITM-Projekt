@@ -6,7 +6,7 @@ variable "opnsense_vm_name" {
 variable "opnsense_vm_id" {
   description = "ID der VM"
   type        = number
-  nullable = true
+  nullable    = true
 }
 
 variable "opnsense_proxmox_node" {
@@ -33,37 +33,37 @@ variable "opnsense_proxmox_ve_network_bridge_wan" {
 }
 
 variable "opnsense_proxmox_ve_network_bridge_lan" {
-    description = "Bridge für LAN"
-    type    = string
-    default = "vmbr1"
+  description = "Bridge für LAN"
+  type        = string
+  default     = "vmbr1"
 }
 
 variable "opnsense_vm_network_interface_wan" {
-    type    = string
-    default = "em0"
+  type    = string
+  default = "em0"
 }
 
 variable "opnsense_vm_network_interface_lan" {
-    type    = string
-    default = "em1"
+  type    = string
+  default = "em1"
 }
 
 variable "opnsense_vm_lan_ip" {
-    type    = string  
+  type    = string  
 }
 
 variable "opnsense_vm_wan_ip" {
-    type    = string
+  type    = string
 }
 
 variable "opnsense_vm_wan_gateway" {
-    type    = string
+  type    = string
 }
 
 variable "proxmox_lan_ip" {
-    type    = string
+  type    = string
 }
 
 variable "opnsense_vm_dns_server" {
-    type    = string
+  type    = string
 }

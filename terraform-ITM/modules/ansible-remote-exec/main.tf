@@ -9,5 +9,4 @@ resource "terraform_data" "ansible_remote_exec" {
   provisioner "remote-exec" {
     inline = var.inline_commands
   }
-
 }

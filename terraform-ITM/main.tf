@@ -1,151 +1,150 @@
 terraform {
-        required_providers {
-                telmate-proxmox = {
-                        source = "telmate/proxmox"
-                        version = "3.0.1-rc4"
-                }
-                bpg-proxmox = {
-                        source = "bpg/proxmox"
-                        version = "0.69.0"
-                }
-        }
+  required_providers {
+    telmate-proxmox = {
+      source = "telmate/proxmox"
+      version = "3.0.1-rc4"
+    }
+    bpg-proxmox = {
+      source = "bpg/proxmox"
+      version = "0.69.0"
+    }
+  }
 }
 
 provider "telmate-proxmox" {
-
-        pm_api_url= "${var.proxmox_url}/api2/json"
-        pm_api_token_id = var.proxmox_api_token_id
-        pm_api_token_secret = var.proxmox_api_token_secret
-        pm_tls_insecure = true
+  pm_api_url = "${var.proxmox_url}/api2/json"
+  pm_api_token_id = var.proxmox_api_token_id
+  pm_api_token_secret = var.proxmox_api_token_secret
+  pm_tls_insecure = true
 }
 
 provider "bpg-proxmox" {
-        endpoint = "${var.proxmox_url}/api2/json"
-        api_token = "${var.proxmox_api_token_id}=${var.proxmox_api_token_secret}"
-        insecure  = true
+  endpoint = "${var.proxmox_url}/api2/json"
+  api_token = "${var.proxmox_api_token_id}=${var.proxmox_api_token_secret}"
+  insecure  = true
 }
 
 # Module einbinden
 module "ansible" {
-        source          = "./modules/ansible"
-        vm_name         = var.ansible_vm_name
-        vm_id           = var.ansible_vm_id
-        proxmox_node    = var.ansible_proxmox_node
-        cores           = var.ansible_vm_cores
-        memory          = var.ansible_vm_memory
-        ip              = var.ansible_vm_ip
-        subnet_cidr     = var.ansible_vm_subnet_cidr
-        gateway         = var.ansible_vm_gateway
-        network_config_typ_lan = var.ansible_vm_network_config_typ_lan
-        ssh_keys        = concat([file("~/.ssh/id_rsa.pub")], var.additional_ssh_keys)
-        ip_regex        = var.ansible_ip_address_filter_for_connection
-        proxmox_url     = var.proxmox_url
+  source = "./modules/ansible"
+  vm_name = var.ansible_vm_name
+  vm_id = var.ansible_vm_id
+  proxmox_node = var.ansible_proxmox_node
+  cores = var.ansible_vm_cores
+  memory = var.ansible_vm_memory
+  ip = var.ansible_vm_ip
+  subnet_cidr = var.ansible_vm_subnet_cidr
+  gateway = var.ansible_vm_gateway
+  network_config_typ_lan = var.ansible_vm_network_config_typ_lan
+  ssh_keys = concat([file("~/.ssh/id_rsa.pub")], var.additional_ssh_keys)
+  ip_regex = var.ansible_ip_address_filter_for_connection
+  proxmox_url = var.proxmox_url
 }
 
 module "OPNsense" {
-        source          = "./modules/OPNsense"
-        vm_name         = var.opnsense_vm_name
-        vm_id           = var.opnsense_vm_id
-        proxmox_node    = var.opnsense_proxmox_node
-        cores           = var.opnsense_cores
-        memory          = var.opnsense_memory
-        proxmox_ve_network_bridge_wan = var.opnsense_proxmox_ve_network_bridge_wan
-        proxmox_ve_network_bridge_lan = var.opnsense_proxmox_ve_network_bridge_lan
-        vm_network_interface_wan = var.opnsense_vm_network_interface_wan
-        vm_network_interface_lan = var.opnsense_vm_network_interface_lan
-        vm_lan_ip       = var.opnsense_vm_lan_ip
-        vm_wan_ip       = var.opnsense_vm_wan_ip
-        wan_gateway     = var.opnsense_vm_wan_gateway
-        proxmox_lan_ip  = var.proxmox_lan_ip
-        vm_dns_server   = var.opnsense_vm_dns_server
-        ssh_keys        = concat([module.ansible.public_ssh_key], [file("~/.ssh/id_rsa.pub")]) #, var.additional_ssh_keys
-        ansible_ip      = var.ansible_vm_ip
-        ansible_ssh_key = module.ansible.public_ssh_key
-        dhcp_dns_server = var.bind9_vm_ip
+  source = "./modules/OPNsense"
+  vm_name = var.opnsense_vm_name
+  vm_id = var.opnsense_vm_id
+  proxmox_node = var.opnsense_proxmox_node
+  cores = var.opnsense_cores
+  memory = var.opnsense_memory
+  proxmox_ve_network_bridge_wan = var.opnsense_proxmox_ve_network_bridge_wan
+  proxmox_ve_network_bridge_lan = var.opnsense_proxmox_ve_network_bridge_lan
+  vm_network_interface_wan = var.opnsense_vm_network_interface_wan
+  vm_network_interface_lan = var.opnsense_vm_network_interface_lan
+  vm_lan_ip = var.opnsense_vm_lan_ip
+  vm_wan_ip = var.opnsense_vm_wan_ip
+  wan_gateway = var.opnsense_vm_wan_gateway
+  proxmox_lan_ip = var.proxmox_lan_ip
+  vm_dns_server = var.opnsense_vm_dns_server
+  ssh_keys = concat([module.ansible.public_ssh_key], [file("~/.ssh/id_rsa.pub")]) #, var.additional_ssh_keys
+  ansible_ip = var.ansible_vm_ip
+  ansible_ssh_key = module.ansible.public_ssh_key
+  dhcp_dns_server = var.bind9_vm_ip
 }
 
 module "bind9" {
-        depends_on = [module.OPNsense]
+  depends_on = [module.OPNsense]
 
-        source          = "./modules/bind9"
-        vm_name         = var.bind9_vm_name
-        vm_id           = var.bind9_vm_id
-        proxmox_node    = var.bind9_proxmox_node
-        cores           = var.bind9_vm_cores
-        memory          = var.bind9_vm_memory
-        ssh_keys        = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
-        ip              = "${var.bind9_vm_ip}/${var.bind9_vm_subnet_cidr}"
-        gateway         = var.bind9_vm_gateway
-        ansible_ip      = var.ansible_vm_ip
-        ansible_ssh_key = module.ansible.public_ssh_key
-        opnsense_ip     = var.opnsense_vm_lan_ip
-        opnsense_vm_name = var.opnsense_vm_name
+  source = "./modules/bind9"
+  vm_name = var.bind9_vm_name
+  vm_id = var.bind9_vm_id
+  proxmox_node = var.bind9_proxmox_node
+  cores = var.bind9_vm_cores
+  memory = var.bind9_vm_memory
+  ssh_keys = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
+  ip = "${var.bind9_vm_ip}/${var.bind9_vm_subnet_cidr}"
+  gateway = var.bind9_vm_gateway
+  ansible_ip = var.ansible_vm_ip
+  ansible_ssh_key = module.ansible.public_ssh_key
+  opnsense_ip = var.opnsense_vm_lan_ip
+  opnsense_vm_name = var.opnsense_vm_name
 }
 
 module "nginx-webserver" {
-        depends_on = [module.bind9, module.OPNsense]
+  depends_on = [module.bind9, module.OPNsense]
 
-        source          = "./modules/nginx-webserver"
-        vm_name         = var.nginx-webserver_vm_name
-        vm_id           = var.nginx-webserver_vm_id
-        proxmox_node    = var.nginx-webserver_proxmox_node
-        cores           = var.nginx-webserver_vm_cores
-        memory          = var.nginx-webserver_vm_memory
-        ssh_keys        = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
-        ansible_ip      = var.ansible_vm_ip
-        ansible_ssh_key = module.ansible.public_ssh_key
-        opnsense_vm_name = var.opnsense_vm_name
-        opnsense_api_key = module.OPNsense.opnsense_api_key
-        opnsense_api_secret = module.OPNsense.opnsense_api_secret
-        external_port   = var.nginx-webserver_external_port
+  source = "./modules/nginx-webserver"
+  vm_name = var.nginx-webserver_vm_name
+  vm_id = var.nginx-webserver_vm_id
+  proxmox_node = var.nginx-webserver_proxmox_node
+  cores = var.nginx-webserver_vm_cores
+  memory = var.nginx-webserver_vm_memory
+  ssh_keys = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
+  ansible_ip = var.ansible_vm_ip
+  ansible_ssh_key = module.ansible.public_ssh_key
+  opnsense_vm_name = var.opnsense_vm_name
+  opnsense_api_key = module.OPNsense.opnsense_api_key
+  opnsense_api_secret = module.OPNsense.opnsense_api_secret
+  external_port = var.nginx-webserver_external_port
 }
 
 module "fileserver" {
-        depends_on = [module.bind9, module.OPNsense]
+  depends_on = [module.bind9, module.OPNsense]
 
-        source          = "./modules/fileserver"
-        vm_name         = var.fileserver_vm_name
-        vm_id           = var.fileserver_vm_id
-        proxmox_node    = var.fileserver_proxmox_node
-        cores           = var.fileserver_vm_cores
-        memory          = var.fileserver_vm_memory
-        ssh_keys        = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
-        ansible_ip      = var.ansible_vm_ip
-        ansible_ssh_key = module.ansible.public_ssh_key
+  source = "./modules/fileserver"
+  vm_name = var.fileserver_vm_name
+  vm_id = var.fileserver_vm_id
+  proxmox_node = var.fileserver_proxmox_node
+  cores = var.fileserver_vm_cores
+  memory = var.fileserver_vm_memory
+  ssh_keys = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
+  ansible_ip = var.ansible_vm_ip
+  ansible_ssh_key = module.ansible.public_ssh_key
 }
 
 module "docker-swarm" {
-        depends_on = [module.bind9, module.OPNsense]
+  depends_on = [module.bind9, module.OPNsense]
 
-        source          = "./modules/docker-swarm"
-        docker_vms = merge(
-                tomap({for i in range(var.number_docker_swarm_manager_nodes) : "docker-swarm-manager-${i+1}" => {
-                                ip             = "dhcp"
-                                gateway        = ""
-                                proxmox_node   = var.docker-swarm_proxmox_node
-                                cores          = var.docker-swarm_vm_cores
-                                memory         = var.docker-swarm_vm_memory
-                                network_bridge = "vmbr1"
-                                ssh_keys       = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
-                                tags           = ["swarm","swarm-manager"]
-                }}),
-                tomap({for i in range(var.number_docker_swarm_worker_nodes) : "docker-swarm-worker-${i+1}" => {
-                                ip             = "dhcp"
-                                gateway        = ""
-                                proxmox_node   = var.docker-swarm_proxmox_node
-                                cores          = var.docker-swarm_vm_cores
-                                memory         = var.docker-swarm_vm_memory
-                                network_bridge = "vmbr1"
-                                ssh_keys       = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
-                                tags           = ["swarm","swarm-worker"]
-                }})
-        )
-        ansible_ip      = var.ansible_vm_ip
-        ansible_ssh_key = module.ansible.public_ssh_key
-        opnsense_vm_name = var.opnsense_vm_name
-        opnsense_api_key = module.OPNsense.opnsense_api_key
-        opnsense_api_secret = module.OPNsense.opnsense_api_secret
-        external_port   = var.docker-swarm_external_port
-        smb_nextcloud_user = module.fileserver.smb_nextcloud_user
-        smb_nextcloud_password = module.fileserver.smb_nextcloud_password
+  source = "./modules/docker-swarm"
+  docker_vms = merge(
+    tomap({for i in range(var.number_docker_swarm_manager_nodes) : "docker-swarm-manager-${i+1}" => {
+      ip = "dhcp"
+      gateway = ""
+      proxmox_node = var.docker-swarm_proxmox_node
+      cores = var.docker-swarm_vm_cores
+      memory = var.docker-swarm_vm_memory
+      network_bridge = "vmbr1"
+      ssh_keys = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
+      tags = ["swarm","swarm-manager"]
+    }}),
+    tomap({for i in range(var.number_docker_swarm_worker_nodes) : "docker-swarm-worker-${i+1}" => {
+      ip = "dhcp"
+      gateway = ""
+      proxmox_node = var.docker-swarm_proxmox_node
+      cores = var.docker-swarm_vm_cores
+      memory = var.docker-swarm_vm_memory
+      network_bridge = "vmbr1"
+      ssh_keys = concat([module.ansible.public_ssh_key], var.additional_ssh_keys)
+      tags = ["swarm","swarm-worker"]
+    }})
+  )
+  ansible_ip = var.ansible_vm_ip
+  ansible_ssh_key = module.ansible.public_ssh_key
+  opnsense_vm_name = var.opnsense_vm_name
+  opnsense_api_key = module.OPNsense.opnsense_api_key
+  opnsense_api_secret = module.OPNsense.opnsense_api_secret
+  external_port = var.docker-swarm_external_port
+  smb_nextcloud_user = module.fileserver.smb_nextcloud_user
+  smb_nextcloud_password = module.fileserver.smb_nextcloud_password
 }
