@@ -52,7 +52,7 @@
       vars:
         DATABASE_PASSWORD: "{{ var_database_password }}"
         FULLTEXTSEARCH_PASSWORD: "{{ var_fulltextsearch_password }}"
-        IMAGINARY_SECRET: "{{ var_imaginary_password }}"
+        IMAGINARY_SECRET: "{{ var_imaginary_secret }}"
         NC_DOMAIN: "{{ var_nc_domain }}"
         NEXTCLOUD_PASSWORD: "{{ var_nextcloud_password }}"
         # ONLYOFFICE_SECRET: "{{ var_onlyoffice_secret }}"
