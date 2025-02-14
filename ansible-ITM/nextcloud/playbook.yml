@@ -27,7 +27,7 @@
         src: "//{{ hostvars[var_fileserver_name].ansible_host }}/Nextcloud Data/"
         path: "{{ var_nextcloud_mount_datadir }}"
         fstype: "cifs"
-        opts: "username={{ var_smb_nextcloud_user }},password={{ var_smb_nextcloud_password }},file_mode=0644,dir_mode=0755"
+        opts: "username={{ var_smb_nextcloud_user }},password={{ var_smb_nextcloud_password }},uid=33,gid=0,file_mode=0770,dir_mode=0770"
         state: "mounted"
 
     - name: Mount SMB Nextcloud Config share
@@ -35,7 +35,7 @@
         src: "//{{ hostvars[var_fileserver_name].ansible_host }}/Nextcloud Config/"
         path: "/mnt/nextcloud_config"
         fstype: "cifs"
-        opts: "username={{ var_smb_nextcloud_user }},password={{ var_smb_nextcloud_password }},file_mode=0666,dir_mode=0777"
+        opts: "username={{ var_smb_nextcloud_user }},password={{ var_smb_nextcloud_password }},uid=33,gid=0,,file_mode=0770,dir_mode=0770"
         state: "mounted"
 
 - name: Nextcloud AIO
@@ -55,7 +55,7 @@
         IMAGINARY_SECRET: "{{ var_imaginary_secret }}"
         NC_DOMAIN: "{{ var_nc_domain }}"
         NEXTCLOUD_PASSWORD: "{{ var_nextcloud_password }}"
-        # ONLYOFFICE_SECRET: "{{ var_onlyoffice_secret }}"
+#        ONLYOFFICE_SECRET: "{{ var_onlyoffice_secret }}"
         RECORDING_SECRET: "{{ var_recording_secret }}"
         REDIS_PASSWORD: "{{ var_redis_password }}"
         SIGNALING_SECRET: "{{ var_signaling_secret }}"
@@ -64,14 +64,14 @@
         TURN_SECRET: "{{ var_turn_secret }}"
         WHITEBOARD_SECRET: "{{ var_whiteboard_secret }}"
 
-        CLAMAV_ENABLED: "yes"
-        COLLABORA_ENABLED: "yes"
-        FULLTEXTSEARCH_ENABLED: "yes"
-        IMAGINARY_ENABLED: "yes"
+        CLAMAV_ENABLED: "no"
+        COLLABORA_ENABLED: "no"
+        FULLTEXTSEARCH_ENABLED: "no"
+        IMAGINARY_ENABLED: "no"
         ONLYOFFICE_ENABLED: "no"
-        TALK_ENABLED: "yes"
-        TALK_RECORDING_ENABLED: "yes"
-        WHITEBOARD_ENABLED: "yes"
+        TALK_ENABLED: "no"
+        TALK_RECORDING_ENABLED: "no"
+        WHITEBOARD_ENABLED: "no"
 
         APACHE_IP_BINDING: "0.0.0.0"
         APACHE_MAX_SIZE: "17179869184"
