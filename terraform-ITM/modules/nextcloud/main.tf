@@ -14,7 +14,7 @@ locals {
     var_redis_password = nonsensitive(random_password.redis_password.result)
     var_signaling_secret = nonsensitive(random_password.signaling_secret.result)
     var_talk_internal_secret = nonsensitive(random_password.talk_internal_secret.result)
-    var_talk_secret = nonsensitive(random_password.talk_secret.result)
+    var_turn_secret = nonsensitive(random_password.turn_secret.result)
     var_whiteboard_secret = nonsensitive(random_password.whiteboard_secret.result)
   }), "\"", "\\\"")
 }
@@ -64,7 +64,7 @@ resource "random_password" "talk_internal_secret" {
   special = false
 }
 
-resource "random_password" "talk_secret" {
+resource "random_password" "turn_secret" {
   length = 30
   special = false
 }
