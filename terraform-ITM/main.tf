@@ -148,3 +148,13 @@ module "docker-swarm" {
   smb_nextcloud_user = module.fileserver.smb_nextcloud_user
   smb_nextcloud_password = module.fileserver.smb_nextcloud_password
 }
+
+module "nextcloud" {
+  depends_on = [module.bind9, module.OPNsense, module.fileserver, module.docker-swarm]
+
+  source = "./modules/nextcloud"
+  ansible_ip = var.ansible_vm_ip
+  smb_nextcloud_user = module.fileserver.smb_nextcloud_user
+  smb_nextcloud_password = module.fileserver.smb_nextcloud_password
+  fileserver_vm_name = var.fileserver_vm_name
+}

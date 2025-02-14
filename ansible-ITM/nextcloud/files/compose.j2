@@ -1,24 +1,12 @@
 services:
   nextcloud-aio-apache:
     depends_on:
-      nextcloud-aio-onlyoffice:
-        condition: service_started
-        required: false
-      nextcloud-aio-collabora:
-        condition: service_started
-        required: false
-      nextcloud-aio-talk:
-        condition: service_started
-        required: false
-      nextcloud-aio-nextcloud:
-        condition: service_started
-        required: false
-      nextcloud-aio-notify-push:
-        condition: service_started
-        required: false
-      nextcloud-aio-whiteboard:
-        condition: service_started
-        required: false
+#      - nextcloud-aio-onlyoffice
+      - nextcloud-aio-collabora
+      - nextcloud-aio-talk
+      - nextcloud-aio-nextcloud
+      - nextcloud-aio-notify-push
+      - nextcloud-aio-whiteboard
     image: nextcloud/aio-apache:latest
     user: "33"
     init: true
@@ -29,6 +17,8 @@ services:
       timeout: 30s
       start_interval: 5s
       retries: 3
+    networks:
+      - nextcloud
     ports:
       - {{ APACHE_IP_BINDING }}:{{ APACHE_PORT }}:{{ APACHE_PORT }}/tcp
       - {{ APACHE_IP_BINDING }}:{{ APACHE_PORT }}:{{ APACHE_PORT }}/udp
@@ -70,6 +60,8 @@ services:
       timeout: 30s
       start_interval: 5s
       retries: 3
+    networks:
+      - nextcloud
     expose:
       - "5432"
     volumes:
@@ -83,7 +75,7 @@ services:
       - PGTZ={{ TIMEZONE }}
     stop_grace_period: 1800s
     restart: unless-stopped
-    shm_size: 268435456
+    shm_size: "268435456"
     read_only: true
     tmpfs:
       - /var/run/postgresql
@@ -91,25 +83,25 @@ services:
       - NET_RAW
 
   nextcloud-aio-nextcloud:
-    depends_on:
-      nextcloud-aio-database:
-        condition: service_started
-        required: false
-      nextcloud-aio-redis:
-        condition: service_started
-        required: false
-      nextcloud-aio-clamav:
-        condition: service_started
-        required: false
-      nextcloud-aio-fulltextsearch:
-        condition: service_started
-        required: false
-      nextcloud-aio-talk-recording:
-        condition: service_started
-        required: false
-      nextcloud-aio-imaginary:
-        condition: service_started
-        required: false
+    # depends_on:
+    #   nextcloud-aio-database:
+    #     condition: service_started
+    #     required: false
+    #   nextcloud-aio-redis:
+    #     condition: service_started
+    #     required: false
+    #   nextcloud-aio-clamav:
+    #     condition: service_started
+    #     required: false
+    #   nextcloud-aio-fulltextsearch:
+    #     condition: service_started
+    #     required: false
+    #   nextcloud-aio-talk-recording:
+    #     condition: service_started
+    #     required: false
+    #   nextcloud-aio-imaginary:
+    #     condition: service_started
+    #     required: false
     image: nextcloud/aio-nextcloud:latest
     init: true
     healthcheck:
@@ -119,6 +111,8 @@ services:
       timeout: 30s
       start_interval: 5s
       retries: 3
+    networks:
+      - nextcloud
     expose:
       - "9000"
       - "9001"
@@ -146,7 +140,7 @@ services:
       - OVERWRITEPROTOCOL=https
       - TURN_SECRET
       - SIGNALING_SECRET
-      - ONLYOFFICE_SECRET
+#      - ONLYOFFICE_SECRET
       - NEXTCLOUD_MOUNT
       - CLAMAV_ENABLED
       - CLAMAV_HOST=nextcloud-aio-clamav
@@ -195,6 +189,8 @@ services:
       timeout: 30s
       start_interval: 5s
       retries: 3
+    networks:
+      - nextcloud
     expose:
       - "7867"
     volumes:
@@ -226,6 +222,8 @@ services:
       timeout: 30s
       start_interval: 5s
       retries: 3
+    networks:
+      - nextcloud
     expose:
       - "6379"
     environment:
@@ -248,6 +246,8 @@ services:
       timeout: 30s
       start_interval: 5s
       retries: 9
+    networks:
+      - nextcloud
     expose:
       - "9980"
     environment:
@@ -275,6 +275,8 @@ services:
       timeout: 30s
       start_interval: 5s
       retries: 3
+    networks:
+      - nextcloud
     ports:
       - {{ TALK_PORT }}:{{ TALK_PORT }}/tcp
       - {{ TALK_PORT }}:{{ TALK_PORT }}/udp
@@ -310,6 +312,8 @@ services:
       timeout: 30s
       start_interval: 5s
       retries: 3
+    networks:
+      - nextcloud
     expose:
       - "1234"
     environment:
@@ -319,7 +323,7 @@ services:
       - INTERNAL_SECRET={{ TALK_INTERNAL_SECRET }}
     volumes:
       - nextcloud_aio_talk_recording:/tmp:rw
-    shm_size: 2147483648
+    shm_size: "2147483648"
     restart: unless-stopped
     read_only: true
     tmpfs:
@@ -338,6 +342,8 @@ services:
       timeout: 30s
       start_interval: 5s
       retries: 9
+    networks:
+      - nextcloud
     expose:
       - "3310"
     environment:
@@ -355,28 +361,28 @@ services:
     cap_drop:
       - NET_RAW
 
-  nextcloud-aio-onlyoffice:
-    image: nextcloud/aio-onlyoffice:latest
-    init: true
-    healthcheck:
-      start_period: 60s
-      test: /healthcheck.sh
-      interval: 30s
-      timeout: 30s
-      start_interval: 5s
-      retries: 9
-    expose:
-      - "80"
-    environment:
-      - TZ={{ TIMEZONE }}
-      - JWT_ENABLED=true
-      - JWT_HEADER=AuthorizationJwt
-      - JWT_SECRET={{ ONLYOFFICE_SECRET }}
-    volumes:
-      - nextcloud_aio_onlyoffice:/var/lib/onlyoffice:rw
-    restart: unless-stopped
-    cap_drop:
-      - NET_RAW
+  # nextcloud-aio-onlyoffice:
+  #   image: nextcloud/aio-onlyoffice:latest
+  #   init: true
+  #   healthcheck:
+  #     start_period: 60s
+  #     test: /healthcheck.sh
+  #     interval: 30s
+  #     timeout: 30s
+  #     start_interval: 5s
+  #     retries: 9
+  #   expose:
+  #     - "80"
+  #   environment:
+  #     - TZ={{ TIMEZONE }}
+  #     - JWT_ENABLED=true
+  #     - JWT_HEADER=AuthorizationJwt
+  #     - JWT_SECRET=ONLYOFFICE_SECRET
+  #   volumes:
+  #     - nextcloud_aio_onlyoffice:/var/lib/onlyoffice:rw
+  #   restart: unless-stopped
+  #   cap_drop:
+  #     - NET_RAW
 
   nextcloud-aio-imaginary:
     image: nextcloud/aio-imaginary:latest
@@ -389,6 +395,8 @@ services:
       timeout: 30s
       start_interval: 5s
       retries: 3
+    networks:
+      - nextcloud
     expose:
       - "9000"
     environment:
@@ -413,6 +421,8 @@ services:
       timeout: 5s
       start_interval: 5s
       retries: 5
+    networks:
+      - nextcloud
     expose:
       - "9200"
     environment:
@@ -443,6 +453,8 @@ services:
       timeout: 30s
       start_interval: 5s
       retries: 3
+    networks:
+      - nextcloud
     expose:
       - "3002"
     tmpfs:
@@ -473,8 +485,8 @@ volumes:
     name: nextcloud_aio_elasticsearch
   nextcloud_aio_nextcloud:
     name: nextcloud_aio_nextcloud
-  nextcloud_aio_onlyoffice:
-    name: nextcloud_aio_onlyoffice
+  # nextcloud_aio_onlyoffice:
+  #   name: nextcloud_aio_onlyoffice
   nextcloud_aio_redis:
     name: nextcloud_aio_redis
   nextcloud_aio_talk_recording:
@@ -483,5 +495,5 @@ volumes:
     name: nextcloud_aio_nextcloud_data
 
 networks:
-  default:
-    driver: bridge
+  nextcloud:
+    driver: overlay
