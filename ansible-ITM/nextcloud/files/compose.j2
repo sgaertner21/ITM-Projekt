@@ -23,15 +23,15 @@ services:
       - {{ APACHE_IP_BINDING }}:{{ APACHE_PORT }}:{{ APACHE_PORT }}/tcp
       - {{ APACHE_IP_BINDING }}:{{ APACHE_PORT }}:{{ APACHE_PORT }}/udp
     environment:
-      - NC_DOMAIN
+      - NC_DOMAIN={{ NC_DOMAIN }}
       - NEXTCLOUD_HOST=nextcloud-aio-nextcloud
       - APACHE_HOST=nextcloud-aio-apache
       - COLLABORA_HOST=nextcloud-aio-collabora
       - TALK_HOST=nextcloud-aio-talk
-      - APACHE_PORT
+      - APACHE_PORT={{ APACHE_PORT }}
       - ONLYOFFICE_HOST=nextcloud-aio-onlyoffice
       - TZ={{ TIMEZONE }}
-      - APACHE_MAX_SIZE
+      - APACHE_MAX_SIZE={{ APACHE_MAX_SIZE }}
       - APACHE_MAX_TIME={{ NEXTCLOUD_MAX_TIME }}
       - NOTIFY_PUSH_HOST=nextcloud-aio-notify-push
       - WHITEBOARD_HOST=nextcloud-aio-whiteboard
@@ -131,48 +131,48 @@ services:
       - REDIS_HOST=nextcloud-aio-redis
       - REDIS_HOST_PASSWORD={{ REDIS_PASSWORD }}
       - APACHE_HOST=nextcloud-aio-apache
-      - APACHE_PORT
-      - NC_DOMAIN
+      - APACHE_PORT={{ APACHE_PORT }}
+      - NC_DOMAIN={{ NC_DOMAIN }}
       - ADMIN_USER=admin
       - ADMIN_PASSWORD={{ NEXTCLOUD_PASSWORD }}
       - NEXTCLOUD_DATA_DIR=/mnt/ncdata
       - OVERWRITEHOST={{ NC_DOMAIN }}
       - OVERWRITEPROTOCOL=https
-      - TURN_SECRET
-      - SIGNALING_SECRET
-#      - ONLYOFFICE_SECRET
-      - NEXTCLOUD_MOUNT
-      - CLAMAV_ENABLED
+      - TURN_SECRET={{ TURN_SECRET }}
+      - SIGNALING_SECRET={{ SIGNALING_SECRET }}
+      - ONLYOFFICE_SECRET
+      - NEXTCLOUD_MOUNT={{ NEXTCLOUD_MOUNT }}
+      - CLAMAV_ENABLED={{ CLAMAV_ENABLED }}
       - CLAMAV_HOST=nextcloud-aio-clamav
-      - ONLYOFFICE_ENABLED
-      - COLLABORA_ENABLED
+      - ONLYOFFICE_ENABLED={{ ONLYOFFICE_ENABLED }} 
+      - COLLABORA_ENABLED={{ COLLABORA_ENABLED }}
       - COLLABORA_HOST=nextcloud-aio-collabora
-      - TALK_ENABLED
+      - TALK_ENABLED={{ TALK_ENABLED }}
       - ONLYOFFICE_HOST=nextcloud-aio-onlyoffice
-      - UPDATE_NEXTCLOUD_APPS
+      - UPDATE_NEXTCLOUD_APPS={{ UPDATE_NEXTCLOUD_APPS }}
       - TZ={{ TIMEZONE }}
-      - TALK_PORT
-      - IMAGINARY_ENABLED
+      - TALK_PORT={{ TALK_PORT }}
+      - IMAGINARY_ENABLED={{ IMAGINARY_ENABLED }}
       - IMAGINARY_HOST=nextcloud-aio-imaginary
       - CLAMAV_MAX_SIZE={{ APACHE_MAX_SIZE }}
       - PHP_UPLOAD_LIMIT={{ NEXTCLOUD_UPLOAD_LIMIT }}
       - PHP_MEMORY_LIMIT={{ NEXTCLOUD_MEMORY_LIMIT }}
-      - FULLTEXTSEARCH_ENABLED
+      - FULLTEXTSEARCH_ENABLED={{ FULLTEXTSEARCH_ENABLED }}
       - FULLTEXTSEARCH_HOST=nextcloud-aio-fulltextsearch
       - PHP_MAX_TIME={{ NEXTCLOUD_MAX_TIME }}
       - TRUSTED_CACERTS_DIR={{ NEXTCLOUD_TRUSTED_CACERTS_DIR }}
       - STARTUP_APPS={{ NEXTCLOUD_STARTUP_APPS }}
       - ADDITIONAL_APKS={{ NEXTCLOUD_ADDITIONAL_APKS }}
       - ADDITIONAL_PHP_EXTENSIONS={{ NEXTCLOUD_ADDITIONAL_PHP_EXTENSIONS }}
-      - INSTALL_LATEST_MAJOR
-      - TALK_RECORDING_ENABLED
-      - RECORDING_SECRET
+      - INSTALL_LATEST_MAJOR={{ INSTALL_LATEST_MAJOR }}
+      - TALK_RECORDING_ENABLED={{ TALK_RECORDING_ENABLED }}
+      - RECORDING_SECRET={{ RECORDING_SECRET }}
       - TALK_RECORDING_HOST=nextcloud-aio-talk-recording
-      - FULLTEXTSEARCH_PASSWORD
-      - REMOVE_DISABLED_APPS
-      - IMAGINARY_SECRET
-      - WHITEBOARD_SECRET
-      - WHITEBOARD_ENABLED
+      - FULLTEXTSEARCH_PASSWORD={{ FULLTEXTSEARCH_PASSWORD }}
+      - REMOVE_DISABLED_APPS={{ REMOVE_DISABLED_APPS }}
+      - IMAGINARY_SECRET={{ IMAGINARY_SECRET }}
+      - WHITEBOARD_SECRET={{ WHITEBOARD_SECRET }}
+      - WHITEBOARD_ENABLED={{ WHITEBOARD_ENABLED }}
     stop_grace_period: 600s
     restart: unless-stopped
     cap_drop:
@@ -196,7 +196,7 @@ services:
     volumes:
       - nextcloud_aio_nextcloud:/nextcloud:ro
     environment:
-      - NC_DOMAIN
+      - NC_DOMAIN={{ NC_DOMAIN }}
       - NEXTCLOUD_HOST=nextcloud-aio-nextcloud
       - TZ={{ TIMEZONE }}
       - REDIS_HOST=nextcloud-aio-redis
@@ -283,12 +283,12 @@ services:
     expose:
       - "8081"
     environment:
-      - NC_DOMAIN
+      - NC_DOMAIN={{ NC_DOMAIN }}
       - TALK_HOST=nextcloud-aio-talk
-      - TURN_SECRET
-      - SIGNALING_SECRET
+      - TURN_SECRET={{ TURN_SECRET }}
+      - SIGNALING_SECRET={{ SIGNALING_SECRET }}
       - TZ={{ TIMEZONE }}
-      - TALK_PORT
+      - TALK_PORT={{ TALK_PORT }}
       - INTERNAL_SECRET={{ TALK_INTERNAL_SECRET }}
     restart: unless-stopped
     read_only: true
@@ -317,9 +317,9 @@ services:
     expose:
       - "1234"
     environment:
-      - NC_DOMAIN
+      - NC_DOMAIN={{ NC_DOMAIN }}
       - TZ={{ TIMEZONE }}
-      - RECORDING_SECRET
+      - RECORDING_SECRET={{ RECORDING_SECRET }}
       - INTERNAL_SECRET={{ TALK_INTERNAL_SECRET }}
     volumes:
       - nextcloud_aio_talk_recording:/tmp:rw
@@ -401,7 +401,7 @@ services:
       - "9000"
     environment:
       - TZ={{ TIMEZONE }}
-      - IMAGINARY_SECRET
+      - IMAGINARY_SECRET={{ IMAGINARY_SECRET }}
     restart: unless-stopped
     cap_add:
       - SYS_NICE
@@ -435,7 +435,7 @@ services:
       - http.port=9200
       - xpack.license.self_generated.type=basic
       - xpack.security.enabled=false
-      - FULLTEXTSEARCH_PASSWORD
+      - FULLTEXTSEARCH_PASSWORD={{ FULLTEXTSEARCH_PASSWORD }}
     volumes:
       - nextcloud_aio_elasticsearch:/usr/share/elasticsearch/data:rw
     restart: unless-stopped
