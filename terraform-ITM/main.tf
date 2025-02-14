@@ -119,6 +119,7 @@ module "docker-swarm" {
   source = "./modules/docker-swarm"
   docker_vms = merge(
     tomap({for i in range(var.number_docker_swarm_manager_nodes) : "docker-swarm-manager-${i+1}" => {
+      vm_id = var.docker-swarm_start_vm_id + i
       ip = "dhcp"
       gateway = ""
       proxmox_node = var.docker-swarm_proxmox_node
@@ -129,6 +130,7 @@ module "docker-swarm" {
       tags = ["swarm","swarm-manager"]
     }}),
     tomap({for i in range(var.number_docker_swarm_worker_nodes) : "docker-swarm-worker-${i+1}" => {
+      vm_id = var.docker-swarm_start_vm_id + var.number_docker_swarm_manager_nodes + i
       ip = "dhcp"
       gateway = ""
       proxmox_node = var.docker-swarm_proxmox_node

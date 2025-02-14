@@ -1,3 +1,8 @@
+variable "docker-swarm_start_vm_id" {
+  description = "Start-ID für die Docker-Swarm-VMs"
+  type = number  
+}
+
 variable "docker-swarm_vm_name" {
   description = "Name der VM"
   type = string

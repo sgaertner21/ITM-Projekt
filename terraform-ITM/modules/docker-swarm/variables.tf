@@ -1,6 +1,7 @@
 variable "docker_vms" {
   description = "Liste der Docker-VMs"
   type        = map(object({
+    vm_id          = number
     ip             = string
     gateway        = string
     proxmox_node   = string

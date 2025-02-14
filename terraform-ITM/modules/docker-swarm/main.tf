@@ -11,6 +11,7 @@ resource "proxmox_vm_qemu" "docker-swarm" {
   for_each    = var.docker_vms
 
   name        = each.key
+  vmid        = each.value.vm_id
   target_node = each.value.proxmox_node
 
   # Hardware-Spezifikationen
