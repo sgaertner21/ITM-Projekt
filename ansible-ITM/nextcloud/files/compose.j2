@@ -36,16 +36,24 @@ services:
       - NOTIFY_PUSH_HOST=nextcloud-aio-notify-push
       - WHITEBOARD_HOST=nextcloud-aio-whiteboard
     volumes:
-      - nextcloud_aio_nextcloud:/var/www/html:ro
-      - nextcloud_aio_apache:/mnt/data:rw
+      - type: volume
+        source: nextcloud_aio_nextcloud
+        target: /var/www/html
+      - type: volume
+        source: nextcloud_aio_apache
+        target: /mnt/data
+      - type: tmpfs
+        target: /var/run/supervisord
+      - type: tmpfs
+        target: /var/log/supervisord
+      - type: tmpfs
+        target: /usr/local/apache2/logs
+      - type: tmpfs
+        target: /tmp
+      - type: tmpfs
+        target: /home/www-data
     restart: unless-stopped
     read_only: true
-    # tmpfs:
-    #   - /var/log/supervisord
-    #   - /var/run/supervisord
-    #   - /usr/local/apache2/logs
-    #   - /tmp
-    #   - /home/www-data
     cap_drop:
       - NET_RAW
 
@@ -65,9 +73,14 @@ services:
     expose:
       - "5432"
     volumes:
-      - nextcloud_aio_database:/var/lib/postgresql/data:rw
-      - nextcloud_aio_database_dump:/mnt/data:rw
-      - /var/run/postgresql:/var/run/postgresql:rw
+      - type: volume
+        source: nextcloud_aio_database
+        target: /var/lib/postgresql/data
+      - type: volume
+        source: nextcloud_aio_database_dump
+        target: /mnt/data
+      - type: tmpfs
+        target: /var/run/postgresql
     environment:
       - POSTGRES_PASSWORD={{ DATABASE_PASSWORD }}
       - POSTGRES_DB=nextcloud_database
@@ -78,8 +91,6 @@ services:
     restart: unless-stopped
     shm_size: "268435456"
     read_only: true
-    # tmpfs:
-    #   - /var/run/postgresql
     cap_drop:
       - NET_RAW
 
@@ -283,6 +294,17 @@ services:
       - {{ TALK_PORT }}:{{ TALK_PORT }}/udp
     expose:
       - "8081"
+    volumes:
+      - type: tmpfs
+        target: /var/run/supervisord
+      - type: tmpfs
+        target: /var/log/supervisord
+      - type: tmpfs
+        target: /opt/eturnal/run
+      - type: tmpfs
+        target: /conf
+      - type: tmpfs
+        target: /tmp
     environment:
       - NC_DOMAIN={{ NC_DOMAIN }}
       - TALK_HOST=nextcloud-aio-talk
@@ -293,12 +315,6 @@ services:
       - INTERNAL_SECRET={{ TALK_INTERNAL_SECRET }}
     restart: unless-stopped
     read_only: true
-    # tmpfs:
-    #   - /var/log/supervisord
-    #   - /var/run/supervisord
-    #   - /opt/eturnal/run
-    #   - /conf
-    #   - /tmp
     cap_drop:
       - NET_RAW
 
@@ -323,12 +339,14 @@ services:
       - RECORDING_SECRET={{ RECORDING_SECRET }}
       - INTERNAL_SECRET={{ TALK_INTERNAL_SECRET }}
     volumes:
-      - nextcloud_aio_talk_recording:/tmp:rw
+      - type: volume
+        source: nextcloud_aio_talk_recording
+        target: /tmp
+      - type: tmpfs
+        target: /conf
     shm_size: "2147483648"
     restart: unless-stopped
     read_only: true
-    # tmpfs:
-    #   - /conf
     cap_drop:
       - NET_RAW
 
@@ -352,13 +370,17 @@ services:
       - MAX_SIZE={{ NEXTCLOUD_UPLOAD_LIMIT }}
       - CLAMD_STARTUP_TIMEOUT=90
     volumes:
-      - nextcloud_aio_clamav:/var/lib/clamav:rw
+      - type: volume
+        source: nextcloud_aio_clamav
+        target: /var/lib/clamav
+      - type: tmpfs
+        target: /var/lock
+      - type: tmpfs
+        target: /var/log/clamav
+      - type: tmpfs
+        target: /tmp
     restart: unless-stopped
     read_only: true
-    # tmpfs:
-    #   - /var/lock
-    #   - /var/log/clamav
-    #   - /tmp
     cap_drop:
       - NET_RAW
 
@@ -400,6 +422,9 @@ services:
       - nextcloud
     expose:
       - "9000"
+    volumes:
+      - type: tmpfs
+        target: /tmp
     environment:
       - TZ={{ TIMEZONE }}
       - IMAGINARY_SECRET={{ IMAGINARY_SECRET }}
@@ -409,8 +434,6 @@ services:
     cap_drop:
       - NET_RAW
     read_only: true
-    # tmpfs:
-    #   - /tmp
 
   nextcloud-aio-fulltextsearch:
     image: nextcloud/aio-fulltextsearch:latest
@@ -458,8 +481,9 @@ services:
       - nextcloud
     expose:
       - "3002"
-    # tmpfs:
-    #   - /tmp
+    volumes:
+      - type: tmpfs
+        target: /tmp
     environment:
       - TZ={{ TIMEZONE }}
       - NEXTCLOUD_URL=https://{{ NC_DOMAIN }}
