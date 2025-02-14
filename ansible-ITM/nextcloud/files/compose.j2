@@ -40,12 +40,12 @@ services:
       - nextcloud_aio_apache:/mnt/data:rw
     restart: unless-stopped
     read_only: true
-    tmpfs:
-      - /var/log/supervisord
-      - /var/run/supervisord
-      - /usr/local/apache2/logs
-      - /tmp
-      - /home/www-data
+    # tmpfs:
+    #   - /var/log/supervisord
+    #   - /var/run/supervisord
+    #   - /usr/local/apache2/logs
+    #   - /tmp
+    #   - /home/www-data
     cap_drop:
       - NET_RAW
 
@@ -67,6 +67,7 @@ services:
     volumes:
       - nextcloud_aio_database:/var/lib/postgresql/data:rw
       - nextcloud_aio_database_dump:/mnt/data:rw
+      - /var/run/postgresql:/var/run/postgresql:rw
     environment:
       - POSTGRES_PASSWORD={{ DATABASE_PASSWORD }}
       - POSTGRES_DB=nextcloud_database
@@ -77,8 +78,8 @@ services:
     restart: unless-stopped
     shm_size: "268435456"
     read_only: true
-    tmpfs:
-      - /var/run/postgresql
+    # tmpfs:
+    #   - /var/run/postgresql
     cap_drop:
       - NET_RAW
 
@@ -292,12 +293,12 @@ services:
       - INTERNAL_SECRET={{ TALK_INTERNAL_SECRET }}
     restart: unless-stopped
     read_only: true
-    tmpfs:
-      - /var/log/supervisord
-      - /var/run/supervisord
-      - /opt/eturnal/run
-      - /conf
-      - /tmp
+    # tmpfs:
+    #   - /var/log/supervisord
+    #   - /var/run/supervisord
+    #   - /opt/eturnal/run
+    #   - /conf
+    #   - /tmp
     cap_drop:
       - NET_RAW
 
@@ -326,8 +327,8 @@ services:
     shm_size: "2147483648"
     restart: unless-stopped
     read_only: true
-    tmpfs:
-      - /conf
+    # tmpfs:
+    #   - /conf
     cap_drop:
       - NET_RAW
 
@@ -354,10 +355,10 @@ services:
       - nextcloud_aio_clamav:/var/lib/clamav:rw
     restart: unless-stopped
     read_only: true
-    tmpfs:
-      - /var/lock
-      - /var/log/clamav
-      - /tmp
+    # tmpfs:
+    #   - /var/lock
+    #   - /var/log/clamav
+    #   - /tmp
     cap_drop:
       - NET_RAW
 
@@ -408,8 +409,8 @@ services:
     cap_drop:
       - NET_RAW
     read_only: true
-    tmpfs:
-      - /tmp
+    # tmpfs:
+    #   - /tmp
 
   nextcloud-aio-fulltextsearch:
     image: nextcloud/aio-fulltextsearch:latest
@@ -457,8 +458,8 @@ services:
       - nextcloud
     expose:
       - "3002"
-    tmpfs:
-      - /tmp
+    # tmpfs:
+    #   - /tmp
     environment:
       - TZ={{ TIMEZONE }}
       - NEXTCLOUD_URL=https://{{ NC_DOMAIN }}
