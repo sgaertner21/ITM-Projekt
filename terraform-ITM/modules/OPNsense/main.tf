@@ -62,6 +62,15 @@ resource "proxmox_vm_qemu" "OPNsense_vm" {
   scsihw     = "lsi"
   onboot     = "true"
 
+  # Cloudinit Disk
+  disk {
+    storage = "local"
+    type    = "cdrom"
+    iso     = "${proxmox_cloud_init_disk.OPNsense_cloud_init.id}"
+    format  = "qcow2"
+    slot    = "ide0"
+  }
+
   # Speicher VM
   disk {
     storage    = "local"
@@ -70,15 +79,6 @@ resource "proxmox_vm_qemu" "OPNsense_vm" {
     format     = "qcow2"
     slot       = "scsi0"
     emulatessd = true
-  }
-
-  # Cloudinit Disk
-  disk {
-    storage = "local"
-    type    = "cdrom"
-    iso     = "${proxmox_cloud_init_disk.OPNsense_cloud_init.id}"
-    format  = "qcow2"
-    slot    = "ide0"
   }
 
   boot = "order=scsi0"

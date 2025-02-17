@@ -78,9 +78,9 @@ locals {
     var_nextcloud_data_owner_group = "nextcloud-group",
     var_nextcloud_data_valid_users = "@nextcloud-group",
     var_nextcloud_data_write_list = "@nextcloud-group",
-    var_nextcloud_config_owner_group = "nextcloud-group",
-    var_nextcloud_config_valid_users = "@nextcloud-group",
-    var_nextcloud_config_write_list = "@nextcloud-group",
+    var_docker_volumes_owner_group = "nextcloud-group",
+    var_docker_volumes_valid_users = "@nextcloud-group",
+    var_docker_volumes_write_list = "@nextcloud-group",
   }), "\"", "\\\"")
 }
 

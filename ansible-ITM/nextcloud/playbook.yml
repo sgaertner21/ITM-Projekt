@@ -10,32 +10,20 @@
           - python3-yaml
         state: present
 
-    - name: Create Data directory
-      ansible.builtin.file:
-        path: "{{ var_nextcloud_mount_datadir }}"
-        mode: "0777"
-        state: "directory"
-
-    - name: Create Config directory
-      ansible.builtin.file:
-        path: "/mnt/nextcloud_config"
-        mode: "0777"
-        state: "directory"
-
     - name: Mount SMB Nextcloud Data share
       ansible.posix.mount:
         src: "//{{ hostvars[var_fileserver_name].ansible_host }}/Nextcloud Data/"
         path: "{{ var_nextcloud_mount_datadir }}"
         fstype: "cifs"
-        opts: "username={{ var_smb_nextcloud_user }},password={{ var_smb_nextcloud_password }},uid=33,gid=0,file_mode=0770,dir_mode=0770"
+        opts: "username={{ var_smb_nextcloud_user }},password={{ var_smb_nextcloud_password }},uid=33,gid=0,file_mode=0770,dir_mode=0770,mfsymlinks"
         state: "mounted"
 
-    - name: Mount SMB Nextcloud Config share
+    - name: Mount SMB Docker volumes share
       ansible.posix.mount:
-        src: "//{{ hostvars[var_fileserver_name].ansible_host }}/Nextcloud Config/"
-        path: "/mnt/nextcloud_config"
+        src: "//{{ hostvars[var_fileserver_name].ansible_host }}/Docker Volumes/"
+        path: "{{ var_mount_volumes_dir }}"
         fstype: "cifs"
-        opts: "username={{ var_smb_nextcloud_user }},password={{ var_smb_nextcloud_password }},uid=33,gid=0,,file_mode=0770,dir_mode=0770"
+        opts: "username={{ var_smb_nextcloud_user }},password={{ var_smb_nextcloud_password }},uid=33,gid=0,,file_mode=0777,dir_mode=0777,mfsymlinks"
         state: "mounted"
 
 - name: Nextcloud AIO
@@ -82,6 +70,10 @@
         NEXTCLOUD_ADDITIONAL_APKS: imagemagick
         NEXTCLOUD_ADDITIONAL_PHP_EXTENSIONS: imagick
         NEXTCLOUD_DATADIR: "{{ var_nextcloud_mount_datadir }}"
+        VOLUME_CIFS_SERVER: "{{ hostvars[var_fileserver_name].ansible_host }}"
+        VOLUME_CIFS_SHARE: "Docker Volumes"
+        VOLUME_CIFS_USER: "{{ var_smb_nextcloud_user }}"
+        VOLUME_CIFS_PASSWORD: "{{ var_smb_nextcloud_password }}"
         NEXTCLOUD_MAX_TIME: "3600"
         NEXTCLOUD_MEMORY_LIMIT: 512M
         NEXTCLOUD_MOUNT: /mnt/
@@ -91,6 +83,24 @@
         REMOVE_DISABLED_APPS: "yes"
         TALK_PORT: "3478"
         UPDATE_NEXTCLOUD_APPS: "no"
+
+    - name: Create Volume folders
+      ansible.builtin.file:
+        path: "{{ var_mount_volumes_dir }}/{{ item }}"
+        state: directory
+        owner: 33
+        group: 0
+        mode: "0777"
+      loop:
+        - "nextcloud_aio_nextcloud"
+        - "nextcloud_aio_apache"
+        - "nextcloud_aio_database"
+        - "nextcloud_aio_database_dump"
+        - "nextcloud_aio_redis"
+        - "nextcloud_aio_talk_recording"
+        - "nextcloud_aio_clamav"
+        - "nextcloud_aio_onlyoffice"
+        - "nextcloud_aio_elasticsearch"
 
     - name: Deploy Nextcloud AIO container in Swarm mode
       community.docker.docker_stack:

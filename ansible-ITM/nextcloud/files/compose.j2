@@ -9,7 +9,7 @@ services:
       - nextcloud-aio-whiteboard
     image: nextcloud/aio-apache:latest
     user: "33"
-    init: true
+    init: true 
     healthcheck:
       start_period: 0s
       test: /healthcheck.sh
@@ -36,12 +36,8 @@ services:
       - NOTIFY_PUSH_HOST=nextcloud-aio-notify-push
       - WHITEBOARD_HOST=nextcloud-aio-whiteboard
     volumes:
-      - type: volume
-        source: nextcloud_aio_nextcloud
-        target: /var/www/html
-      - type: volume
-        source: nextcloud_aio_apache
-        target: /mnt/data
+      - nextcloud_aio_nextcloud:/var/www/html:rw
+      - nextcloud_aio_apache:/mnt/data:rw
       - type: tmpfs
         target: /var/run/supervisord
       - type: tmpfs
@@ -73,12 +69,8 @@ services:
     expose:
       - "5432"
     volumes:
-      - type: volume
-        source: nextcloud_aio_database
-        target: /var/lib/postgresql/data
-      - type: volume
-        source: nextcloud_aio_database_dump
-        target: /mnt/data
+      - nextcloud_aio_database:/var/lib/postgresql/data:rw
+      - nextcloud_aio_database_dump:/mnt/data:rw
       - type: tmpfs
         target: /var/run/postgresql
     environment:
@@ -327,9 +319,7 @@ services:
   #     - RECORDING_SECRET={{ RECORDING_SECRET }}
   #     - INTERNAL_SECRET={{ TALK_INTERNAL_SECRET }}
   #   volumes:
-  #     - type: volume
-  #       source: nextcloud_aio_talk_recording
-  #       target: /tmp
+  #     - nextcloud_aio_talk_recording:/tmp:rw
   #     - type: tmpfs
   #       target: /conf
   #   shm_size: "2147483648"
@@ -358,9 +348,7 @@ services:
   #     - MAX_SIZE={{ NEXTCLOUD_UPLOAD_LIMIT }}
   #     - CLAMD_STARTUP_TIMEOUT=90
   #   volumes:
-  #     - type: volume
-  #       source: nextcloud_aio_clamav
-  #       target: /var/lib/clamav
+  #     - nextcloud_aio_clamav:/var/lib/clamav
   #     - type: tmpfs
   #       target: /var/lock
   #     - type: tmpfs
@@ -488,24 +476,62 @@ services:
 volumes:
   nextcloud_aio_apache:
     name: nextcloud_aio_apache
+    driver: local
+    driver_opts:
+      type: cifs
+      device: //{{ VOLUME_CIFS_SERVER }}/{{ VOLUME_CIFS_SHARE }}/nextcloud_aio_apache
+      o: username={{ VOLUME_CIFS_USER }},password={{ VOLUME_CIFS_PASSWORD }},uid=33,gid=33,file_mode=0777,dir_mode=0777,mfsymlinks
   nextcloud_aio_clamav:
     name: nextcloud_aio_clamav
+    driver: local
+    driver_opts:
+      type: cifs
+      device: //{{ VOLUME_CIFS_SERVER }}/{{ VOLUME_CIFS_SHARE }}/nextcloud_aio_clamav
+      o: username={{ VOLUME_CIFS_USER }},password={{ VOLUME_CIFS_PASSWORD }},uid=100,gid=100,file_mode=0777,dir_mode=0777,mfsymlinks
   nextcloud_aio_database:
     name: nextcloud_aio_database
+    driver: local
+    driver_opts:
+      type: cifs
+      device: //{{ VOLUME_CIFS_SERVER }}/{{ VOLUME_CIFS_SHARE }}/nextcloud_aio_database
+      o: username={{ VOLUME_CIFS_USER }},password={{ VOLUME_CIFS_PASSWORD }},uid=999,gid=999,file_mode=0750,dir_mode=0750,mfsymlinks
   nextcloud_aio_database_dump:
     name: nextcloud_aio_database_dump
+    driver: local
+    driver_opts:
+      type: cifs
+      device: //{{ VOLUME_CIFS_SERVER }}/{{ VOLUME_CIFS_SHARE }}/nextcloud_aio_database_dump
+      o: username={{ VOLUME_CIFS_USER }},password={{ VOLUME_CIFS_PASSWORD }},uid=999,gid=999,file_mode=0777,dir_mode=0777,mfsymlinks
   nextcloud_aio_elasticsearch:
     name: nextcloud_aio_elasticsearch
+    driver: local
+    driver_opts:
+      type: cifs
+      device: //{{ VOLUME_CIFS_SERVER }}/{{ VOLUME_CIFS_SHARE }}/nextcloud_aio_elasticsearch
+      o: username={{ VOLUME_CIFS_USER }},password={{ VOLUME_CIFS_PASSWORD }},uid=1000,gid=1000,file_mode=0777,dir_mode=0777,mfsymlinks
   nextcloud_aio_nextcloud:
     name: nextcloud_aio_nextcloud
+    driver: local
+    driver_opts:
+      type: cifs
+      device: //{{ VOLUME_CIFS_SERVER }}/{{ VOLUME_CIFS_SHARE }}/nextcloud_aio_nextcloud
+      o: username={{ VOLUME_CIFS_USER }},password={{ VOLUME_CIFS_PASSWORD }},uid=33,gid=33,file_mode=0777,dir_mode=0777,mfsymlinks
   # nextcloud_aio_onlyoffice:
   #   name: nextcloud_aio_onlyoffice
   nextcloud_aio_redis:
     name: nextcloud_aio_redis
+    driver: local
+    driver_opts:
+      type: cifs
+      device: //{{ VOLUME_CIFS_SERVER }}/{{ VOLUME_CIFS_SHARE }}/nextcloud_aio_redis
+      o: username={{ VOLUME_CIFS_USER }},password={{ VOLUME_CIFS_PASSWORD }},uid=999,gid=999,file_mode=0777,dir_mode=0777,mfsymlinks
   nextcloud_aio_talk_recording:
     name: nextcloud_aio_talk_recording
-  nextcloud_aio_nextcloud_data:
-    name: nextcloud_aio_nextcloud_data
+    driver: local
+    driver_opts:
+      type: cifs
+      device: //{{ VOLUME_CIFS_SERVER }}/{{ VOLUME_CIFS_SHARE }}/nextcloud_aio_talk_recording
+      o: username={{ VOLUME_CIFS_USER }},password={{ VOLUME_CIFS_PASSWORD }},uid=122,gid=122,file_mode=0777,dir_mode=0777,mfsymlinks
 
 networks:
   nextcloud:

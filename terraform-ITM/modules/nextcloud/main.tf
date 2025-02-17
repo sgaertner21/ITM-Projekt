@@ -4,6 +4,7 @@ locals {
     var_smb_nextcloud_user = var.smb_nextcloud_user
     var_smb_nextcloud_password = nonsensitive(var.smb_nextcloud_password)
     var_nextcloud_mount_datadir = "/mnt/nextcloud_data"
+    var_mount_volumes_dir = "/mnt/docker_volumes"
     var_database_password = nonsensitive(random_password.database_password.result)
     var_fulltextsearch_password = nonsensitive(random_password.fulltextsearch_password.result)
     var_imaginary_secret = nonsensitive(random_password.imaginary_secret.result)

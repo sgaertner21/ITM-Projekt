@@ -81,18 +81,18 @@
             valid_users: "{{ var_nextcloud_data_valid_users }}"
             write_list: "{{ var_nextcloud_data_write_list }}"
             writable: true
-          - name: Nextcloud Config
-            comment: Nextcloud Config store
+          - name: Docker Volumes
+            comment: Docker Volume store
             browseable: false
             create_mode: "0770"
             directory_mode: "0770"
             force_create_mode: "0000"
             force_directory_mode: "0000"
             owner: nobody
-            group: "{{ var_nextcloud_config_owner_group }}"
+            group: "{{ var_docker_volumes_owner_group }}"
             path: /srv/shares/nextcloud/config
-            valid_users: "{{ var_nextcloud_config_valid_users }}"
-            write_list:  "{{ var_nextcloud_config_write_list }}"
+            valid_users: "{{ var_docker_volumes_valid_users }}"
+            write_list:  "{{ var_docker_volumes_write_list }}"
             writable: true
         samba_users: "{{ linux_samba_users }}"
         samba_workgroup: WORKGROUP

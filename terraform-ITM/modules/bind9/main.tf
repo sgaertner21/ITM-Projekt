@@ -28,7 +28,6 @@ resource "proxmox_vm_qemu" "bind9" {
   disk {
     type = "cloudinit"
     storage = "local"
-    size = "4M"
     slot = "ide0"
   }
 
