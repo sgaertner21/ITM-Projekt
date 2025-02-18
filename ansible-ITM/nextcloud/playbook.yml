@@ -23,7 +23,7 @@
         src: "//{{ hostvars[var_fileserver_name].ansible_host }}/Docker Volumes/"
         path: "{{ var_mount_volumes_dir }}"
         fstype: "cifs"
-        opts: "username={{ var_smb_nextcloud_user }},password={{ var_smb_nextcloud_password }},uid=33,gid=0,,file_mode=0777,dir_mode=0777,mfsymlinks"
+        opts: "username={{ var_smb_nextcloud_user }},password={{ var_smb_nextcloud_password }},uid=33,gid=0,file_mode=0777,dir_mode=0777,mfsymlinks"
         state: "mounted"
 
 - name: Nextcloud AIO
