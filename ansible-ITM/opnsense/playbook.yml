@@ -1,13 +1,15 @@
 - name: Install prerequisites
+  # Calls another playbook to install the necessary prerequisites.
   ansible.builtin.import_playbook: install_prerequisites.yml
 
 - name: Create OPNsense Ansible User and API key
-
+  # Defines the target hosts using the variable var_hosts_opnsense and uses root as remote_user.
   hosts: "{{ var_hosts_opnsense }}"
   remote_user: root
-
   tasks:
     - name: Lookup if user ansible is already present
+      # Searches in the XML configuration file whether a user 'ansible' already exists.
+      # The module counts the number of matching elements.
       community.general.xml:
         path: /conf/config.xml
         xpath: /opnsense/system/user[name='ansible']
@@ -15,6 +17,8 @@
       register: user_ansible_check
 
     - name: Create OPNsense Ansible User container
+      # Creates the XML container 'user' under /opnsense/system if the user 'ansible' does not already exist.
+      # add_children adds a new child element, here with the name 'ansible'.
       community.general.xml:
         path: /conf/config.xml
         xpath: /opnsense/system
@@ -27,6 +31,8 @@
       when: user_ansible_check.count == 0
 
     - name: Create OPNsense Ansible User
+      # Sets various properties (e.g., password, UID, shell) for the user 'ansible'.
+      # Iterating over xml_entries (as dict2items) enables the dynamic creation of multiple XML entries.
       community.general.xml:
         path: /conf/config.xml
         xpath: /opnsense/system/user[name='ansible']/{{ item.key }}
@@ -36,9 +42,11 @@
       loop: "{{ xml_entries | dict2items }}"
       vars:
         xml_entries:
+          # Generates a random, base64 encoded password with 16 characters.
           password: lookup('community.general.random_string', base64=true, length=16)
           scope: user
           name: ansible
+          # Encodes the public SSH key as base64 to include it in the XML.
           authorizedkeys: "{{ ssh_keys | b64encode }}"
           comment: User for ansible provisioning
           uid: 2000
@@ -46,6 +54,7 @@
         ssh_keys: "{{ var_ansible_public_ssh_key }}"
 
     - name: Add OPNsense Ansible User to Admin-Group
+      # Adds the user (identified by UID 2000) to the admin group.
       community.general.xml:
         path: /conf/config.xml
         xpath: /opnsense/system/group[name='admins']/member[text()='2000']
@@ -54,6 +63,7 @@
         value: "2000"
 
     - name: Lookup if user already has an API key
+      # Checks if an API key for the user 'ansible' already exists, based on the variable.
       community.general.xml:
         path: /conf/config.xml
         xpath: /opnsense/system/user[name='ansible']/apikeys/item[key='{{ var_ansible_opnsense_api_key }}']
@@ -61,6 +71,7 @@
       register: api_key_check
 
     - name: Create OPNsense Ansible User API key container
+      # Creates the container for API keys if it does not already exist.
       community.general.xml:
         path: /conf/config.xml
         xpath: /opnsense/system/user[name='ansible']/apikeys
@@ -68,6 +79,8 @@
         pretty_print: true
 
     - name: Create OPNsense Ansible User API key
+      # Adds a new API key if one does not already exist.
+      # add_children creates a new element 'item' with a child 'key'.
       community.general.xml:
         path: /conf/config.xml
         xpath: /opnsense/system/user[name='ansible']/apikeys
@@ -80,6 +93,7 @@
       when: api_key_check.count == 0
 
     - name: Add OPNsense Ansible User API key secret
+      # Adds the secret for the API key in the XML configuration.
       community.general.xml:
         path: /conf/config.xml
         xpath: "/opnsense/system/user[name='ansible']/apikeys/\
@@ -89,6 +103,7 @@
         value: "{{ var_ansible_opnsense_api_secret_hash}}"
 
     - name: Disable Unbound DNS Resolver
+      # Disables the Unbound DNS Resolver by setting the value to "0".
       community.general.xml:
         path: /conf/config.xml
         xpath: /opnsense/OPNsense/unboundplus/general/enabled
@@ -97,6 +112,7 @@
         value: "0"
 
     - name: Set DHCP Server DNS server
+      # Sets the DNS server for the DHCP server (in this case for LAN) based on the variable.
       community.general.xml:
         path: /conf/config.xml
         xpath: /opnsense/dhcpd/lan/dnsserver
@@ -105,6 +121,7 @@
         value: "{{ var_dhcp_dns_server }}"
 
     - name: Reload configuration
+      # Reloads the configuration without marking the task as changed.
       changed_when: false
       ansible.builtin.command:
         cmd: /usr/local/etc/rc.reload_all

@@ -1,24 +1,32 @@
-- name: Install prerequisites
-  hosts: localhost
-  become: true
-  tasks:
+# This Playbook contains two sections: one for installing package dependencies and one for
+# installing Ansible Galaxy requirements.
+
+# First section: Installing package dependencies on the local host
+- name: Install prerequisites           # Main task: Installing necessary packages
+  hosts: localhost                      # Target system: Local machine (localhost)
+  become: true                          # Allows commands to be run with elevated privileges (root)
+  tasks:                                # List of tasks
     - name: Install required packages for bertvv.bind
-      ansible.builtin.package:
-        state: present
+      # Task: Install specific Python packages required by the bertvv.bind role
+      ansible.builtin.package:          # Using the default Ansible package management module
+        state: present                  # State: The packages should be installed if they are not already present
         name:
-          - python3-netaddr
-          - python3-dnspython
+          - python3-netaddr             # Package for handling network addresses
+          - python3-dnspython           # Package for processing DNS queries
+
     - name: Install required packages for ansibleguy.opnsense
-      ansible.builtin.package:
-        state: present
+      # Task: Install additional Python packages necessary for ansibleguy.opnsense
+      ansible.builtin.package:          # Using the Ansible package module
+        state: present                  # State: Packages must be installed
         name:
-          - python3-httpx
+          - python3-httpx               # HTTP client for Python, used for network requests
 
-
-- name: Install Ansible Galaxy Requirements
-  hosts: localhost
-  tasks:
+# Second section: Installing Ansible Galaxy Requirements
+- name: Install Ansible Galaxy Requirements      # Main task: Install roles and collections from Ansible Galaxy
+  hosts: localhost                               # Target system: Localhost
+  tasks:                                         # List of tasks
     - name: Install Ansible Galaxy Requirements
-      community.general.ansible_galaxy_install:
-        requirements_file: requirements.yml
-        type: both
+      # This task uses a module to install dependencies defined in an Ansible Galaxy Requirements file.
+      community.general.ansible_galaxy_install:  # Module from the community.general collection
+        requirements_file: requirements.yml      # File that defines the required roles and collections
+        type: both                               # Parameter 'both': Install both roles and collections
