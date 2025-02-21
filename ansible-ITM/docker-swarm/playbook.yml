@@ -2,6 +2,7 @@
   hosts: swarm
   become: true
   tasks:
+    # Install prerequisite packages required for Docker and Python integration.
     - name: Install prerequisites
       ansible.builtin.apt:
         name:
@@ -12,6 +13,7 @@
         state: present
         update_cache: true
 
+    # Download Docker's official GPG key to verify the repository packages.
     - name: Download Docker's official GPG key
       ansible.builtin.get_url:
         url: https://download.docker.com/linux/ubuntu/gpg
@@ -19,15 +21,18 @@
         mode: "0644"
         force: false
 
+    # Retrieve the system's dpkg architecture to include in the repository configuration.
     - name: Retrieve dpkg architecture
       ansible.builtin.command: dpkg --print-architecture
       register: dpkg_arch_result
       changed_when: false
 
+    # Save the detected architecture as a fact for later use.
     - name: Set dpkg architecture fact  # Saves the architecture as a fact for later use
       ansible.builtin.set_fact:
         dpkg_arch: "{{ dpkg_arch_result.stdout }}"
 
+    # Dynamically retrieve the Ubuntu version codename for proper repository URL formation.
     - name: Retrieve Ubuntu version codename dynamically  # Identifies the Ubuntu version
       ansible.builtin.shell: |
         set -o pipefail && grep 'VERSION_CODENAME=' /etc/os-release | cut -d'=' -f2
@@ -36,10 +41,13 @@
       register: codename_result
       changed_when: false
 
+    # Save the Ubuntu version codename as a fact; important for adding the correct repository.
     - name: Set version codename fact dynamically  # Saves the Ubuntu version codename as a fact
       ansible.builtin.set_fact:
         version_codename: "{{ codename_result.stdout }}"
 
+    # Configure apt to use Docker’s repository by adding an entry in the sources list.
+    # This uses the architecture and codename facts collected earlier.
     - name: Add Docker to sources list  # Configures apt to use Docker's repository
       ansible.builtin.lineinfile:
         path: /etc/apt/sources.list.d/docker.list
@@ -48,7 +56,8 @@
         state: present
         mode: '0644'
 
-    - name: Update apt-get  # Refreshes the package database
+    # Update apt package cache and install Docker packages.
+    - name: Update apt-get  # Refreshes the package database and installs Docker packages
       ansible.builtin.apt:
         update_cache: true
         name:
@@ -63,16 +72,19 @@
   hosts: swarm_manager[0]
   become: true
   tasks:
+    # Initialize the Docker Swarm on the first manager node.
+    # The advertise_addr is set to the ansible_host value.
     - name: Initialize Docker Swarm
       community.docker.docker_swarm:
         state: present
         advertise_addr: "{{ ansible_host }}"
-      register: swarm_init
+      register: swarm_init  # Register the output to use join tokens for other nodes
 
 - name: Join remaining Manager Nodes to Swarm
   hosts: swarm_manager:!swarm_manager[0]
   become: true
   tasks:
+    # Join additional manager nodes using the join token retrieved from the first manager.
     - name: Join Docker Swarm Cluster
       community.docker.docker_swarm:
         state: join
@@ -84,6 +96,7 @@
   hosts: swarm_worker
   become: true
   tasks:
+    # Join worker nodes to the Docker Swarm using the worker join token.
     - name: Join Docker Swarm Cluster
       community.docker.docker_swarm:
         state: join

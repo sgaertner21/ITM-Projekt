@@ -2,37 +2,40 @@
   hosts: "{{ var_hosts_webserver }}"
   become: true
   tasks:
-    # Install Nginx
+    # Install Nginx using the apt package manager.
     - name: Ensure Nginx is installed
       apt:
-        name: nginx
-        state: present
-        update_cache: yes
+        name: nginx         # Specify the package to install.
+        state: present      # Ensure the package is installed.
+        update_cache: yes   # Update the apt cache before installation.
 
-    # Start and enable Nginx
+    # Start and enable the Nginx service.
     - name: Ensure Nginx is running
       service:
-        name: nginx
-        state: started
-        enabled: true
+        name: nginx         # Service name.
+        state: started      # Start the service.
+        enabled: true       # Enable the service on system boot.
 
-    # Deploy custom index.html
+    # Copy a custom index.html file to the web server's document root.
     - name: Deploy custom index.html
       copy:
-        src: ./index.html
-        dest: /var/www/html/index.html
-        mode: '0644'
+        src: ./index.html   # Source index file on the control machine.
+        dest: /var/www/html/index.html  # Destination path on the target machine.
+        mode: '0644'        # Set file permissions.
 
-    # Customize default Nginx configuration (optional)
+    # Modify the default Nginx configuration to use index.html.
+    # The line is located and replaced using a regular expression, ensuring that
+    # the index directive is set to "index index.html;".
     - name: Customize default Nginx configuration
       lineinfile:
-        path: /etc/nginx/sites-available/default
-        regexp: '^\s*index .*;$'
-        line: '        index index.html;'
+        path: /etc/nginx/sites-available/default  # File to be modified.
+        regexp: '^\s*index .*;$'   # Regex to find any existing index directive.
+        line: '        index index.html;'  # Replace it with this line.
       notify:
-        - Reload Nginx
+        - Reload Nginx  # Notify handler to reload Nginx if changes occur.
 
   handlers:
+    # Handler to reload Nginx when its configuration is updated.
     - name: Reload Nginx
       service:
         name: nginx
@@ -41,25 +44,30 @@
 - name: Set firewall rules
   hosts: "{{ var_hosts_opnsense }}"
   remote_user: root
+  # Set default parameters for the ansibleguy.opnsense modules.
   module_defaults:
     group/ansibleguy.opnsense.all:
-      firewall: "{{ hostvars[var_opnsense_firewall].ansible_host }}"
-      api_key: "{{ var_opnsense_api_key }}"
-      api_secret: "{{ var_opnsense_api_secret }}"
-      ssl_verify: false
+      firewall: "{{ hostvars[var_opnsense_firewall].ansible_host }}"  # The IP address of the firewall.
+      api_key: "{{ var_opnsense_api_key }}"         # API key for authentication.
+      api_secret: "{{ var_opnsense_api_secret }}"   # API secret for authentication.
+      ssl_verify: false                             # Disable SSL verification (use with caution).
 
   tasks:
+    # Check if a NAT port forwarding rule (targeting the webserver's IP on port 80) exists.
+    # Uses an XPath query on the OPNsense XML config file.
     - name: Lookup if NAT port forwarding rule already exists
       community.general.xml:
         path: /conf/config.xml
         xpath: "/opnsense/nat/rule[target='{{ hostvars[var_webserver].ansible_host }}' and local-port='80']"
-        count: true
+        count: true  # Return the count of matching elements.
       register: nat_rule_check
 
+    # If the NAT rule container doesn't exist, create it.
+    # This ensures the NAT configuration section is present before adding rules.
     - name: Set NAT port forwarding rule container
       community.general.xml:
         path: /conf/config.xml
-        xpath: "/opnsense/nat"
+        xpath: "/opnsense/nat"  # Target the NAT section in the configuration.
         state: present
         pretty_print: true
         add_children:
@@ -67,8 +75,10 @@
               _:
                 - target: "{{ hostvars[var_webserver].ansible_host }}"
                 - local-port: "80"
-      when: nat_rule_check.count == 0
+      when: nat_rule_check.count == 0  # Only add if no such rule exists.
 
+    # Apply multiple XML entries for the NAT rule.
+    # The loop iterates over key-value pairs to configure each element (protocol, interface, etc.).
     - name: Set NAT port forwarding
       community.general.xml:
         path: /conf/config.xml
@@ -84,9 +94,10 @@
           ipprotocol: inet
           target: "{{ hostvars[var_webserver].ansible_host }}"
           local-port: "80"
-          source:
-          destination:
-    
+          source:   # Placeholder for potential source node configuration.
+          destination:   # Placeholder for potential destination node configuration.
+
+    # Define the NAT rule source as "any", meaning it will accept traffic from any source.
     - name: Set NAT port forwarding source
       community.general.xml:
         path: /conf/config.xml
@@ -94,8 +105,10 @@
         state: present
         pretty_print: true
         set_children:
-          - any: "1"
-    
+          - any: "1"   # Enable "any" source.
+
+    # Define the NAT rule destination.
+    # This sets "any" destination and specifies which external port to map.
     - name: Set NAT port forwarding destination
       community.general.xml:
         path: /conf/config.xml
@@ -103,17 +116,19 @@
         state: present
         pretty_print: true
         set_children:
-          - any: "1"
-          - port: "{{ var_external_port }}"
+          - any: "1"                         # Enable "any" destination.
+          - port: "{{ var_external_port }}"  # Set the external port mapping.
 
+    # Configure the OPNsense firewall rule to allow HTTP traffic to the webserver.
+    # This uses the ansibleguy.opnsense.rule module to create or update the rule.
     - name: Set OPNsense firewall rule
       ansibleguy.opnsense.rule:
-        description: 'Rule for Webserver HTTP traffic'
-        direction: in
-        interface: ['wan']
-        ip_protocol: "inet"
-        protocol: "TCP"
-        destination_net: "{{ hostvars[var_webserver].ansible_host }}/32"
-        destination_port: "80"
-        state: present
-        match_fields: ['description']
+        description: 'Rule for Webserver HTTP traffic'  # A description for the rule.
+        direction: in        # Rule applies to incoming traffic.
+        interface: ['wan']   # Apply on the WAN interface.
+        ip_protocol: "inet"  # Specifies IPv4.
+        protocol: "TCP"      # The protocol used for HTTP.
+        destination_net: "{{ hostvars[var_webserver].ansible_host }}/32"  # Target the webserver by IP.
+        destination_port: "80"  # HTTP port.
+        state: present       # Ensure that the rule exists.
+        match_fields: ['description']  # Match based on the description field.

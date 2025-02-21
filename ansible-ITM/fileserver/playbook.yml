@@ -1,98 +1,111 @@
-- name: Format and mount a disk
-  hosts: "{{ var_hosts_fileserver }}"
-  become: true
+# This playbook consists of two plays:
+# 1. Formatting and mounting a disk.
+# 2. Installing and configuring the Samba server with its shares.
+
+- name: Format and mount a disk  # Play to prepare and mount a disk
+  hosts: "{{ var_hosts_fileserver }}"  # Target hosts defined by an external variable
+  become: true  # Use elevated privileges to perform administrative tasks
 
   vars:
-    disk_device: "/dev/vdb"
-    mount_point: "/srv/shares"
-    filesystem_type: "ext4"
+    disk_device: "/dev/vdb"  # The block device to be formatted and mounted
+    mount_point: "/srv/shares"  # The directory where the disk will be mounted
+    filesystem_type: "ext4"  # Filesystem type to format the device
 
   tasks:
     - name: Format the disk
       community.general.filesystem:
-        fstype: "{{ filesystem_type }}"
-        dev: "{{ disk_device }}"
+        fstype: "{{ filesystem_type }}"  # Specify the type of filesystem to create
+        dev: "{{ disk_device }}"  # The device to format
+      # This task formats the provided disk device with the chosen filesystem.
 
     - name: Create the mount point directory
       ansible.builtin.file:
-        path: "{{ mount_point }}"
-        state: directory
+        path: "{{ mount_point }}"  # Directory path where the disk will be mounted
+        state: directory  # Ensure the directory exists
+      # This task creates the mount point directory if it does not already exist.
 
     - name: Mount the disk
       ansible.posix.mount:
-        boot: true
-        path: "{{ mount_point }}"
-        src: "{{ disk_device }}"
-        fstype: "{{ filesystem_type }}"
-        opts: "defaults"
-        state: mounted
+        boot: true  # Register the mount in /etc/fstab for persistence across reboots
+        path: "{{ mount_point }}"  # Mount point where the disk will be attached
+        src: "{{ disk_device }}"  # The device to mount
+        fstype: "{{ filesystem_type }}"  # Filesystem type used on the device
+        opts: "defaults"  # Use default mount options
+        state: mounted  # Ensure the disk is mounted
+      # This task mounts the disk to the specified mount point and ensures it mounts on boot.
 
-- name: Install Samba Server and shares
-  hosts: "{{ var_hosts_fileserver }}"
-  become: true
+- name: Install Samba Server and shares  # Play to install and configure Samba for network file sharing
+  hosts: "{{ var_hosts_fileserver }}"  # Target hosts defined by an external variable
+  become: true  # Use elevated privileges for package installation and configuration
 
   vars:
-    linux_samba_groups: "{{ var_samba_groups }}"
-    linux_samba_users: "{{ var_samba_users }}"
-        
+    linux_samba_groups: "{{ var_samba_groups }}"  # Samba groups provided externally
+    linux_samba_users: "{{ var_samba_users }}"  # Samba users provided externally
+
   tasks:
     - name: Update apt cache
       ansible.builtin.apt:
-        update_cache: yes
+        update_cache: yes  # Refresh the package cache
+      # This ensures that package information is up-to-date before installing new packages.
 
     - name: Create groups
       ansible.builtin.group:
-        name: "{{ item.name }}"
-        state: present
-      loop: "{{ linux_samba_groups }}"
+        name: "{{ item.name }}"  # Group name from the provided list
+        state: present  # Ensure the group exists
+      loop: "{{ linux_samba_groups }}"  # Iterate over each Samba group
+      # This task creates each Samba group as specified in the external variable.
 
     - name: Create system user for Samba
       ansible.builtin.user:
-        name: "{{ item.name }}"
-        shell: /sbin/nologin
-        create_home: false
-        state: present
-        group: "{{ item.group }}"
-        append: true
-      loop: "{{ linux_samba_users }}"
+        name: "{{ item.name }}"  # Username from the provided list
+        shell: /sbin/nologin  # Disable login for system users
+        create_home: false  # Do not create a home directory for these system users
+        state: present  # Ensure the user exists
+        group: "{{ item.group }}"  # Assign the user to a specific Samba group
+        append: true  # Append the group to the existing user groups rather than replacing them
+      loop: "{{ linux_samba_users }}"  # Iterate over each Samba user
+      # This task creates system users required for Samba, preventing them from logging in.
 
     - name: Include Samba Server role
       ansible.builtin.include_role:
-        name: vladgh.samba.server
+        name: vladgh.samba.server  # External role to handle Samba server configuration
       vars:
-        samba_apple_extensions: false
-        samba_enable_netbios: false
-        samba_security: user
-        samba_server_max_protocol: SMB3
-        samba_server_min_protocol: SMB2_02
-        samba_netbios_name: "{{ ansible_hostname }}"
-        samba_server_string: "%m"
+        samba_apple_extensions: false  # Disable Apple-specific SMB extensions
+        samba_enable_netbios: false  # Disable NetBIOS over TCP/IP for modern networking
+        samba_security: user  # Set security mode to user-level authentication
+        samba_server_max_protocol: SMB3  # Set maximum allowed SMB protocol version
+        samba_server_min_protocol: SMB2_02  # Set minimum allowed SMB protocol version
+        samba_netbios_name: "{{ ansible_hostname }}"  # Use the host’s name as its NetBIOS name
+        samba_server_string: "%m"  # Server description string referencing the machine name
         samba_shares:
           - name: Nextcloud Data
             comment: Nextcloud Data store
-            browseable: false
-            create_mode: "0770"
-            directory_mode: "0770"
-            force_create_mode: "0000"
-            force_directory_mode: "0000"
-            owner: nobody
-            group: "{{ var_nextcloud_data_owner_group }}"
-            path: /srv/shares/nextcloud/data
-            valid_users: "{{ var_nextcloud_data_valid_users }}"
-            write_list: "{{ var_nextcloud_data_write_list }}"
-            writable: true
+            browseable: false  # Hide the share from the network browser
+            create_mode: "0770"  # File creation permissions within the share
+            directory_mode: "0770"  # Directory creation permissions within the share
+            force_create_mode: "0000"  # Override default file permissions strictly
+            force_directory_mode: "0000"  # Override default directory permissions strictly
+            owner: nobody  # Default owner for files in the share
+            group: "{{ var_nextcloud_data_owner_group }}"  # Group assigned to the share
+            path: /srv/shares/nextcloud/data  # Filesystem path for the share
+            valid_users: "{{ var_nextcloud_data_valid_users }}"  # Users allowed to access the share
+            write_list: "{{ var_nextcloud_data_write_list }}"  # Users/groups allowed write access
+            writable: true  # Enable write capabilities for the share
+            # This share is dedicated to Nextcloud data with specific access controls.
           - name: Docker Volumes
             comment: Docker Volume store
-            browseable: false
-            create_mode: "0770"
-            directory_mode: "0770"
-            force_create_mode: "0000"
-            force_directory_mode: "0000"
-            owner: nobody
-            group: "{{ var_docker_volumes_owner_group }}"
-            path: /srv/shares/nextcloud/config
-            valid_users: "{{ var_docker_volumes_valid_users }}"
-            write_list:  "{{ var_docker_volumes_write_list }}"
-            writable: true
-        samba_users: "{{ linux_samba_users }}"
-        samba_workgroup: WORKGROUP
+            browseable: false  # Hide the share from network browsing tools
+            create_mode: "0770"  # File creation permissions within the share
+            directory_mode: "0770"  # Directory creation permissions within the share
+            force_create_mode: "0000"  # Force file permissions to override defaults
+            force_directory_mode: "0000"  # Force directory permissions to override defaults
+            owner: nobody  # Default owner for files in the share
+            group: "{{ var_docker_volumes_owner_group }}"  # Group assigned to the share
+            path: /srv/shares/nextcloud/config  # Filesystem path for the share (verify if this is the intended path)
+            valid_users: "{{ var_docker_volumes_valid_users }}"  # Users allowed to access the share
+            write_list:  "{{ var_docker_volumes_write_list }}"  # Specify users/groups with write permissions
+            writable: true  # Allow write operations within the share
+            # This share is set up for Docker volumes with carefully controlled permissions.
+        samba_users: "{{ linux_samba_users }}"  # Provide the previously created Samba users to the role
+        samba_workgroup: WORKGROUP  # Define the workgroup name for network discovery
+      # This task includes the Samba Server role, which configures the server using the provided variables.
