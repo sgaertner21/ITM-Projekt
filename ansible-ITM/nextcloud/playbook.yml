@@ -5,10 +5,11 @@
     - name: Ensure cifs-utils is installed
       ansible.builtin.package:
         name:
-          - cifs-utils
-          - python3-jsondiff
-          - python3-yaml
+          - cifs-utils          # Provides the tools for mounting CIFS/SMB shares.
+          - python3-jsondiff    # Used for detecting JSON differences.
+          - python3-yaml        # Used for parsing YAML files.
         state: present
+      # Ensures required packages for mounting SMB shares and handling JSON/YAML are installed.
 
     - name: Mount SMB Nextcloud Data share
       ansible.posix.mount:
@@ -17,6 +18,9 @@
         fstype: "cifs"
         opts: "username={{ var_smb_nextcloud_user }},password={{ var_smb_nextcloud_password }},uid=33,gid=0,file_mode=0770,dir_mode=0770,mfsymlinks"
         state: "mounted"
+      # Mounts the Nextcloud Data share via the CIFS protocol.
+      # Credentials and permissions (uid, gid, file/dir modes) are specified in the options.
+      # The 'mfsymlinks' option allows support for symbolic links over CIFS.
 
     - name: Mount SMB Docker volumes share
       ansible.posix.mount:
@@ -25,6 +29,9 @@
         fstype: "cifs"
         opts: "username={{ var_smb_nextcloud_user }},password={{ var_smb_nextcloud_password }},uid=33,gid=0,file_mode=0777,dir_mode=0777,mfsymlinks"
         state: "mounted"
+      # Mounts the Docker Volumes share using the CIFS protocol.
+      # Uses similar credentials as the Nextcloud Data share but assigns different file permissions (0777)
+      # to accommodate Docker container requirements.
 
 - name: Nextcloud AIO
   hosts: swarm_manager[0]
@@ -83,6 +90,9 @@
         REMOVE_DISABLED_APPS: "yes"
         TALK_PORT: "3478"
         UPDATE_NEXTCLOUD_APPS: "no"
+      # Generates a docker-compose file from the Jinja2 template 'compose.j2'
+      # and places it at '/root/docker-compose.yml'. Various variables and settings
+      # required for Nextcloud AIO are passed to the template for dynamic configuration.
 
     - name: Create Volume folders
       ansible.builtin.file:
@@ -101,6 +111,9 @@
         - "nextcloud_aio_clamav"
         - "nextcloud_aio_onlyoffice"
         - "nextcloud_aio_elasticsearch"
+      # Creates necessary directories for various Docker volumes.
+      # Each directory is set with open permissions (0777), owned by the user with UID 33, 
+      # and group 0, to ensure containers have proper access.
 
     - name: Deploy Nextcloud AIO container in Swarm mode
       community.docker.docker_stack:
@@ -108,3 +121,5 @@
         compose:
           - "/root/docker-compose.yml"
         state: present
+      # Deploys the Nextcloud AIO stack using Docker Swarm.
+      # The service is created/updated based on the docker-compose file located at '/root/docker-compose.yml'.
