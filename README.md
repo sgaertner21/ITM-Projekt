@@ -9,6 +9,27 @@
 
 
 ## 3. Installationsanleitung
+1. Proxmox VE Templates mit Packer erstellen
+
+    Packer Projekt initialisieren
+    ```
+    packer init
+    ```
+    Packer Templates erstellen (build) im jeweiligen Projekt Ordner
+    ```
+    packer build -var 'proxmox_node=<proxmox_node_name>' -var 'proxmox_vm_id=<vm_id>' -var-file=../credentials.auto.pkrvars.hcl .
+    ```
+
+2. Terraform Projekt deployn
+
+    Terraform Projekt initialisieren
+    ```
+    terraform init
+    ```
+    Terraform Proket erstellen
+    ```
+    terraform apply
+    ```
 
 ## 4. Architekturdiagramm
 
