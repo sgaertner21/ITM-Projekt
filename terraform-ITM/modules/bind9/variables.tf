@@ -42,27 +42,37 @@ variable "network_bridge" {
   default     = "vmbr1"
 }
 
+variable "dns_forwarder" {
+  description = "DNS-Forwarder für die VM"
+  type        = list(string)
+}
+
+variable "dns_zone_net_adress" {
+  description = "Netzwerkadresse der Zone"
+  type        = string
+}
+
 variable "ssh_keys" {
   description = "SSH-Keys für den User ansible"
   type        = list(string)
 }
 
 variable "ansible_ip" {
-    description = "IP-Adresse des Ansible-Servers"
-    type        = string
+  description = "IP-Adresse des Ansible-Servers"
+  type        = string
 }
 
 variable "ansible_ssh_key" {
-    description = "SSH-Key für ansible"
-    type        = string
+  description = "SSH-Key für ansible"
+  type        = string
 }
 
 variable "opnsense_ip" {
-    description = "LAN IP-Adresse des OPNsense-Servers"
-    type        = string
+  description = "LAN IP-Adresse des OPNsense-Servers"
+  type        = string
 }
 
 variable "opnsense_vm_name" {
-    description = "Hostname der OPNsense-VM"
-    type        = string
+  description = "Hostname der OPNsense-VM"
+  type        = string
 }

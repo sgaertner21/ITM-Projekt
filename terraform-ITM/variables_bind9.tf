@@ -41,3 +41,13 @@ variable "bind9_vm_id" {
   type = number
   nullable = true
 }
+
+variable "bind9_dns_forwarder" {
+  description = "DNS-Forwarder für die VM"
+  type = list(string)
+}
+
+variable "bind9_dns_zone_net_adress" {
+  description = "Netzwerkadresse der Zone"
+  type = string
+}

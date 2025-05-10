@@ -4,6 +4,10 @@ terraform {
       source  = "telmate/proxmox"           // Provider source for Proxmox
       version = "3.0.1-rc4"                 // Specific version of the Proxmox provider
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.7.2"
+    }
   }
 }
 
@@ -46,15 +50,21 @@ resource "proxmox_vm_qemu" "bind9" {
   }
 }
 
+resource "random_password" "ddns_domainkey" {
+  length = 64
+}
+
 locals {
-  ansible_variables = replace(jsonencode({
+  ansible_variables = replace(replace(jsonencode({
     var_hosts_dns             = var.vm_name              // DNS host name for Ansible variable
     var_primary_dns_host      = var.vm_name              // Primary DNS host name (duplicate for clarity)
     var_zone_network_address  = "172.18.0"               // Network address for DNS zone configuration
     var_forwarders            = [ "9.9.9.9", "1.1.1.1" ] // DNS forwarders
     var_opnsense_ip           = var.opnsense_ip          // OPNsense IP address variable
+    var_ddns_domainkey = nonsensitive(random_password.ddns_domainkey.base64)
+    var_opnsense_ip = var.opnsense_ip
     var_hosts_opnsense        = var.opnsense_vm_name     // OPNsense VM name variable
-  }), "\"", "\\\"")   // Replace quotes for proper formatting in shell command usage
+  }), "\"", "\\\""), "$", "\\$") // Replace quotes for proper formatting in shell command usage
 }
 
 resource "terraform_data" "run_ansible" {

@@ -110,7 +110,9 @@ module "bind9" {
 
   # IP address configuration expressed in CIDR notation
   ip           = "${var.bind9_vm_ip}/${var.bind9_vm_subnet_cidr}"
-  gateway      = var.bind9_vm_gateway
+  dns_forwarder = var.bind9_dns_forwarder
+  dns_zone_net_adress = var.bind9_dns_zone_net_adress
+gateway      = var.bind9_vm_gateway
 
   # Configuration passed to reach the ansible module and set up communication
   ansible_ip     = var.ansible_vm_ip

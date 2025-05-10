@@ -70,7 +70,7 @@ locals {
   smb_nextcloud_user = "nextcloud-user"   # Username for Nextcloud SMB access.
 
   # Create a JSON string encapsulating various Ansible variables needed for playbook execution.
-  ansible_variables = replace(jsonencode({
+  ansible_variables = replace(replace(jsonencode({
     var_hosts_fileserver = var.vm_name,      # File server host name.
     var_samba_groups     = [                 # Define Samba groups.
       {
@@ -90,7 +90,7 @@ locals {
     var_docker_volumes_owner_group = "nextcloud-group",  # Docker volumes ownership group.
     var_docker_volumes_valid_users = "@nextcloud-group", # Valid users for Docker volumes.
     var_docker_volumes_write_list  = "@nextcloud-group", # Write permission list.
-  }), "\"", "\\\"")   # Escapes double quotes for proper shell injection.
+  }), "\"", "\\\""), "$", "\\$")   # Escapes double quotes for proper shell injection.
 }
 
 # Resource to run Ansible playbook remotely after VM creation.

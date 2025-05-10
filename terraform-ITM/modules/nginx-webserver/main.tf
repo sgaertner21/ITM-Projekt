@@ -54,7 +54,7 @@ resource "proxmox_vm_qemu" "nginx-webserver" {
 
 # Prepare Ansible variables:
 locals {
-  ansible_variables = replace(jsonencode({
+  ansible_variables = replace(replace(jsonencode({
     var_hosts_webserver    = var.vm_name
     var_hosts_opnsense     = var.opnsense_vm_name
     var_opnsense_firewall  = var.opnsense_vm_name
@@ -62,7 +62,7 @@ locals {
     var_opnsense_api_secret = nonsensitive(var.opnsense_api_secret)
     var_webserver          = var.vm_name
     var_external_port      = tostring(var.external_port)
-  }), "\"", "\\\"")
+  }), "\"", "\\\""), "$", "\\$")
   # The replace function escapes quotes to ensure the JSON string is correctly passed as extra-vars to Ansible.
 }
 

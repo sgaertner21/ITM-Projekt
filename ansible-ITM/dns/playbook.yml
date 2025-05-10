@@ -41,7 +41,7 @@
           - name: opnsense
             algorithm: hmac-sha512
             # Shared secret key for dynamic DNS updates authentication.
-            secret: "yawQV7dZ1nnHSUuMWcucv1E/dIaQVegJzb228RpJdQe/WYQaiz0+aEbFOTE3OqV2qGxNZxoRZ0PsJ7VjQZjbnQ=="
+            secret: "{{ var_ddns_domainkey }}"
         bind_extra_include_files:
           # Additional configuration file to include.
           - "{{ bind_auth_file }}"
@@ -71,7 +71,7 @@
           ddnsdomain: itm.internal  # Domain for dynamic DNS.
           ddnsdomainprimary: "{{ hostvars[var_primary_dns_host].ansible_host }}"  # Primary DNS server IP for the domain.
           ddnsdomainkeyname: opnsense  # Key name for dynamic DNS updates.
-          ddnsdomainkey: "yawQV7dZ1nnHSUuMWcucv1E/dIaQVegJzb228RpJdQe/WYQaiz0+aEbFOTE3OqV2qGxNZxoRZ0PsJ7VjQZjbnQ=="  # Shared secret for authentication.
+          ddnsdomainkey: "{{ var_ddns_domainkey }}" # Shared secret for authentication.
           ddnsdomainalgorithm: hmac-sha512  # Algorithm for key validation.
           ddnsupdate: "1"  # Enable dynamic DNS updates.
 
