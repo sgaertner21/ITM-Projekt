@@ -14,7 +14,7 @@
         cmd: python3 -m ensurepip
       register: pip_install_result
       changed_when: "'Requirement already satisfied: pip' not in pip_install_result.stdout"
-    - name: Install lmxl
+    - name: Install lxml
       ansible.builtin.pip:
         name: lxml
         state: present

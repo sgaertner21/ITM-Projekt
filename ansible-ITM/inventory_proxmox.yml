@@ -18,28 +18,3 @@ compose:
         | flatten
         | map('regex_replace', '/.*$', '')
         | first
-    # mac_address: >-
-    #     {% set maclist = [] %}
-    #     {% for iface in (proxmox_agent_interfaces|default([])) %}
-    #     {% for ip in (iface['ip-addresses']|default([])) %}
-    #         {% if ip.startswith('172.18.0.') %}
-    #         {% set _ = maclist.append(iface['mac-address']) %}
-    #         {% endif %}
-    #     {% endfor %}
-    #     {% endfor %}
-    #     {{ maclist|first if maclist else '' }}
-    # mac_172_18: >
-    #     (proxmox_agent_interfaces
-    #     | selectattr('ip-addresses','defined')
-    #     | selectattr('ip-addresses','search','^172\\.18\\.0\\.')
-    #     | map(attribute='mac-address')
-    #     | list
-    #     | first)
-    #     | default('')
-#    mac_address: >
-#        proxmox_agent_interfaces
-#        | selectattr('ip-addresses', 'defined')
-#        | selectattr('ip-addresses', 'join', 'search', '172.18.0.')
-#        | list
-#        | map(attribute='mac-address')
-#        | first

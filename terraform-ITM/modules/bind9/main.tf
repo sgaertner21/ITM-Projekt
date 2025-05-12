@@ -50,7 +50,7 @@ resource "proxmox_vm_qemu" "bind9" {
   }
 }
 
-resource "random_password" "ddns_domainkey" {
+resource "random_bytes" "ddns_domainkey" {
   length = 64
 }
 
@@ -61,7 +61,7 @@ locals {
     var_zone_network_address  = "172.18.0"               // Network address for DNS zone configuration
     var_forwarders            = [ "9.9.9.9", "1.1.1.1" ] // DNS forwarders
     var_opnsense_ip           = var.opnsense_ip          // OPNsense IP address variable
-    var_ddns_domainkey = nonsensitive(random_password.ddns_domainkey.base64)
+    var_ddns_domainkey = nonsensitive(random_bytes.ddns_domainkey.base64)
     var_opnsense_ip = var.opnsense_ip
     var_hosts_opnsense        = var.opnsense_vm_name     // OPNsense VM name variable
   }), "\"", "\\\""), "$", "\\$") // Replace quotes for proper formatting in shell command usage
